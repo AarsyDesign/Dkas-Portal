@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   Music, 
@@ -37,10 +37,32 @@ export default function HomeView({
   onNavigateTab, 
   searchQuery, 
   setSearchQuery,
-  featuredBooks = [],
-  featuredSeries = [],
   onPlayTrack
 }) {
+  const [featuredBooks, setFeaturedBooks] = useState([]);
+  const [featuredSeries, setFeaturedSeries] = useState([]);
+
+  useEffect(() => {
+    async function fetchFeatured() {
+      try {
+        const [booksRes, seriesRes] = await Promise.all([
+          fetch('/api/library?limit=4'),
+          fetch('/api/series?limit=3')
+        ]);
+        if (booksRes.ok) {
+          const b = await booksRes.json();
+          setFeaturedBooks(b.items || []);
+        }
+        if (seriesRes.ok) {
+          const s = await seriesRes.json();
+          setFeaturedSeries(s.items || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch featured items", err);
+      }
+    }
+    fetchFeatured();
+  }, []);
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {

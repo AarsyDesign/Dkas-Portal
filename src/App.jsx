@@ -60,34 +60,26 @@ export default function App() {
     }
   }, [theme]);
 
-  // Load all JSON datasets
+  // Load lightweight metadata from API
   useEffect(() => {
-    async function loadAllData() {
+    async function loadMetadata() {
       setIsLoading(true);
       try {
-        const [statsRes, audioRes, booksRes, authorsRes, seriesRes, asatidzahRes] = await Promise.all([
-          fetch('/data/stats.json').catch(() => null),
-          fetch('/data/audio_catalog.json').catch(() => null),
-          fetch('/data/books.json').catch(() => null),
-          fetch('/data/book_authors.json').catch(() => null),
-          fetch('/data/series.json').catch(() => null),
-          fetch('/data/asatidzah.json').catch(() => null)
-        ]);
-
-        if (statsRes?.ok) setStats(await statsRes.json());
-        if (audioRes?.ok) setAudioCatalog(await audioRes.json());
-        if (booksRes?.ok) setBooks(await booksRes.json());
-        if (authorsRes?.ok) setBookAuthors(await authorsRes.json());
-        if (seriesRes?.ok) setSeriesList(await seriesRes.json());
-        if (asatidzahRes?.ok) setAsatidzahList(await asatidzahRes.json());
+        const res = await fetch('/api/metadata');
+        if (res.ok) {
+          const data = await res.json();
+          setStats(data.stats);
+          setAsatidzahList(data.asatidzah || []);
+          setBookAuthors(data.authors || []);
+        }
       } catch (err) {
-        console.error("Gagal memuat dataset portal:", err);
+        console.error("Gagal memuat metadata portal:", err);
       } finally {
         setIsLoading(false);
       }
     }
 
-    loadAllData();
+    loadMetadata();
   }, []);
 
   // Save bookmarks to localStorage

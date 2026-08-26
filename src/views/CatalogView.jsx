@@ -43,7 +43,6 @@ const SORT_OPTIONS = [
 ];
 
 export default function CatalogView({ 
-  audioCatalog = [], 
   asatidzahList = [], 
   onPlayTrack, 
   onShareItem, 
@@ -60,52 +59,50 @@ export default function CatalogView({
   const [sortBy, setSortBy] = useState('msg_desc');
   const [page, setPage] = useState(1);
   const [pageSize] = useState(24);
+  const [items, setItems] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Fast client-side filtering & sorting
-  const filteredCatalog = useMemo(() => {
-    let result = [...audioCatalog];
-
-    if (selectedCategory && selectedCategory !== 'Semua') {
-      result = result.filter(item => item.c && item.c.toLowerCase() === selectedCategory.toLowerCase());
+  // Fetch data from API
+  React.useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      try {
+        const params = new URLSearchParams({
+          q: searchQuery,
+          category: selectedCategory,
+          ustadz: selectedUstadz,
+          sortBy: sortBy,
+          page: page,
+          limit: pageSize
+        });
+        const res = await fetch(`/api/audio?${params.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          setItems(data.items || []);
+          setTotal(data.total || 0);
+          setTotalPages(data.totalPages || 0);
+        }
+      } catch (err) {
+        console.error("Failed to fetch audio catalog", err);
+      } finally {
+        setIsLoading(false);
+      }
     }
+    
+    // Debounce the fetch slightly if typing in search query
+    const timeoutId = setTimeout(() => {
+      fetchData();
+    }, 300);
 
-    if (selectedUstadz && selectedUstadz !== 'Semua') {
-      result = result.filter(item => item.u && item.u.toLowerCase() === selectedUstadz.toLowerCase());
-    }
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, selectedCategory, selectedUstadz, sortBy, page, pageSize]);
 
-    if (searchQuery && searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      result = result.filter(item => 
-        (item.t && item.t.toLowerCase().includes(q)) ||
-        (item.u && item.u.toLowerCase().includes(q)) ||
-        (item.k && item.k.toLowerCase().includes(q)) ||
-        (item.c && item.c.toLowerCase().includes(q))
-      );
-    }
-
-    // Apply Sorting
-    if (sortBy === 'msg_asc') {
-      result.sort((a, b) => (Number(a.m || a.i) || 0) - (Number(b.m || b.i) || 0));
-    } else if (sortBy === 'msg_desc') {
-      result.sort((a, b) => (Number(b.m || b.i) || 0) - (Number(a.m || a.i) || 0));
-    } else if (sortBy === 'title_asc') {
-      result.sort((a, b) => (a.t || '').localeCompare(b.t || '', 'id'));
-    } else if (sortBy === 'title_desc') {
-      result.sort((a, b) => (b.t || '').localeCompare(a.t || '', 'id'));
-    } else if (sortBy === 'duration_desc') {
-      result.sort((a, b) => (b.d || 0) - (a.d || 0));
-    } else if (sortBy === 'duration_asc') {
-      result.sort((a, b) => (a.d || 0) - (b.d || 0));
-    }
-
-    return result;
-  }, [audioCatalog, selectedCategory, selectedUstadz, searchQuery, sortBy]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredCatalog.length / pageSize));
-  const paginatedItems = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredCatalog.slice(start, start + pageSize);
-  }, [filteredCatalog, page, pageSize]);
+  // Reset page to 1 when filters change
+  React.useEffect(() => {
+    setPage(1);
+  }, [searchQuery, selectedCategory, selectedUstadz, sortBy]);
 
   const handleCopyLink = (item) => {
     const link = item.l || (item.m ? `https://t.me/daftarkajiansalafy/${item.m}` : '');
@@ -139,7 +136,7 @@ export default function CatalogView({
               <span>Katalog Rekaman Audio Kajian</span>
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Menampilkan {filteredCatalog.length.toLocaleString('id-ID')} dari {audioCatalog.length.toLocaleString('id-ID')} rekaman kajian
+              Menampilkan {total.toLocaleString('id-ID')} rekaman kajian
             </p>
           </div>
 
@@ -259,7 +256,7 @@ export default function CatalogView({
       </div>
 
       {/* Audio Cards Grid */}
-      {paginatedItems.length === 0 ? (
+      {items.length === 0 ? (
         <div className="p-16 text-center text-xs text-slate-400 space-y-2 glass-panel rounded-3xl">
           <Music className="w-8 h-8 mx-auto text-slate-300 stroke-1" />
           <p className="font-semibold text-slate-600 dark:text-slate-400">Tidak ada kajian audio yang sesuai pencarian.</p>
@@ -267,7 +264,7 @@ export default function CatalogView({
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
-          {paginatedItems.map((item) => {
+          {items.map((item) => {
             const telegramLink = item.l || (item.m ? `https://t.me/daftarkajiansalafy/${item.m}` : '');
             const bookmarked = isBookmarked(item);
 

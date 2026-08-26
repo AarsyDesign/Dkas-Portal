@@ -98,36 +98,49 @@ export default function LibraryView({
   const [copiedId, setCopiedId] = useState(null);
   const [expandedBookIds, setExpandedBookIds] = useState({});
 
-  // Filter books
-  const filteredBooks = useMemo(() => {
-    let result = books;
+  const [items, setItems] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-    if (selectedAuthor && selectedAuthor !== 'Semua') {
-      result = result.filter(b => b.author.toLowerCase() === selectedAuthor.toLowerCase());
+  // Fetch data from API
+  React.useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      try {
+        const params = new URLSearchParams({
+          q: searchQuery,
+          category: selectedCategory,
+          author: selectedAuthor,
+          page: page,
+          limit: pageSize
+        });
+        const res = await fetch(`/api/library?${params.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          setItems(data.items || []);
+          setTotal(data.total || 0);
+          setTotalPages(data.totalPages || 0);
+        }
+      } catch (err) {
+        console.error("Failed to fetch library catalog", err);
+      } finally {
+        setIsLoading(false);
+      }
     }
+    
+    // Debounce the fetch slightly if typing in search query
+    const timeoutId = setTimeout(() => {
+      fetchData();
+    }, 300);
 
-    if (selectedCategory && selectedCategory !== 'Semua') {
-      result = result.filter(b => b.category && b.category.toLowerCase() === selectedCategory.toLowerCase());
-    }
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, selectedCategory, selectedAuthor, page, pageSize]);
 
-    if (searchQuery && searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      result = result.filter(b => 
-        (b.title && b.title.toLowerCase().includes(q)) ||
-        (b.author && b.author.toLowerCase().includes(q)) ||
-        (b.category && b.category.toLowerCase().includes(q)) ||
-        (b.volumes && b.volumes.some(v => v.file_name && v.file_name.toLowerCase().includes(q)))
-      );
-    }
-
-    return result;
-  }, [books, selectedAuthor, selectedCategory, searchQuery]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredBooks.length / pageSize));
-  const paginatedBooks = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredBooks.slice(start, start + pageSize);
-  }, [filteredBooks, page, pageSize]);
+  // Reset page to 1 when filters change
+  React.useEffect(() => {
+    setPage(1);
+  }, [searchQuery, selectedCategory, selectedAuthor]);
 
   const filteredAuthors = useMemo(() => {
     if (!authorSearch.trim()) return authors;
@@ -370,7 +383,7 @@ export default function LibraryView({
                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
                   selectedAuthor === 'Semua' ? 'bg-emerald-700 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                 }`}>
-                  {books.length}
+                  {total}
                 </span>
               </button>
 

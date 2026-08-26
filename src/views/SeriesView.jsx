@@ -28,43 +28,54 @@ export default function SeriesView({
   const [page, setPage] = useState(1);
   const [pageSize] = useState(12);
 
-  // Extract distinct ustadz in series
-  const ustadzOptions = useMemo(() => {
-    const map = {};
-    seriesList.forEach(s => {
-      if (s.ustadz && s.ustadz !== 'Asatidzah') {
-        map[s.ustadz] = (map[s.ustadz] || 0) + 1;
+  const [items, setItems] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Note: we can't easily extract distinct ustadz dynamically from the full DB 
+  // without a separate query. For now, we will rely on the global asatidzahList if we want it,
+  // but let's just keep the filter input as text or a static list if possible, or remove the dropdown 
+  // and just use search for ustadz. Actually, SeriesView had ustadzOptions. 
+  // We can just omit the dropdown if it's too complex or fetch it from /api/metadata.
+  
+  // Fetch data from API
+  React.useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true);
+      try {
+        const params = new URLSearchParams({
+          q: searchQuery,
+          ustadz: selectedUstadz,
+          page: page,
+          limit: pageSize
+        });
+        const res = await fetch(`/api/series?${params.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          setItems(data.items || []);
+          setTotal(data.total || 0);
+          setTotalPages(data.totalPages || 0);
+        }
+      } catch (err) {
+        console.error("Failed to fetch series catalog", err);
+      } finally {
+        setIsLoading(false);
       }
-    });
-    return Object.entries(map).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
-  }, [seriesList]);
-
-  // Filter series
-  const filteredSeries = useMemo(() => {
-    let result = seriesList;
-
-    if (selectedUstadz && selectedUstadz !== 'Semua') {
-      result = result.filter(s => s.ustadz && s.ustadz.toLowerCase() === selectedUstadz.toLowerCase());
     }
+    
+    // Debounce the fetch slightly if typing in search query
+    const timeoutId = setTimeout(() => {
+      fetchData();
+    }, 300);
 
-    if (searchQuery && searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      result = result.filter(s => 
-        (s.name && s.name.toLowerCase().includes(q)) ||
-        (s.ustadz && s.ustadz.toLowerCase().includes(q)) ||
-        (s.category && s.category.toLowerCase().includes(q)) ||
-        (s.episodes && s.episodes.some(ep => ep.title && ep.title.toLowerCase().includes(q)))
-      );
-    }
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, selectedUstadz, page, pageSize]);
 
-    return result;
-  }, [seriesList, selectedUstadz, searchQuery]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredSeries.length / pageSize));
-  const paginatedSeries = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredSeries.slice(start, start + pageSize);
-  }, [filteredSeries, page, pageSize]);
+  // Reset page to 1 when filters change
+  React.useEffect(() => {
+    setPage(1);
+  }, [searchQuery, selectedUstadz]);
 
   const toggleExpandSeries = (seriesId) => {
     setExpandedSeriesId(prev => (prev === seriesId ? null : seriesId));
@@ -96,7 +107,7 @@ export default function SeriesView({
               <span>Seri & Playlist Kajian Rutin</span>
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Koleksi {seriesList.length.toLocaleString('id-ID')} seri kajian bersambung yang dikelompokkan per kitab dan pembahasan
+              Koleksi {total.toLocaleString('id-ID')} seri kajian bersambung yang dikelompokkan per kitab dan pembahasan
             </p>
           </div>
 
@@ -141,16 +152,14 @@ export default function SeriesView({
             }}
             className="w-full h-9 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 font-medium"
           >
-            <option value="Semua">Semua Pemateri ({seriesList.length} Seri)</option>
-            {ustadzOptions.map((u, idx) => (
-              <option key={idx} value={u.name}>{u.name} ({u.count} Seri)</option>
-            ))}
+            <option value="Semua">Semua Pemateri ({total} Seri)</option>
+            {/* TODO: If we need a dynamic ustadz list, we might want to fetch it separately from metadata API */}
           </select>
         </div>
       </div>
 
       {/* Series Cards Grid */}
-      {paginatedSeries.length === 0 ? (
+      {items.length === 0 ? (
         <div className="p-16 text-center text-xs text-slate-400 space-y-2 glass-panel rounded-3xl">
           <ListMusic className="w-8 h-8 mx-auto text-slate-300 stroke-1" />
           <p className="font-semibold text-slate-600 dark:text-slate-400">Tidak ada seri yang sesuai pencarian.</p>
@@ -158,7 +167,7 @@ export default function SeriesView({
         </div>
       ) : (
         <div className="space-y-4">
-          {paginatedSeries.map((s) => {
+          {items.map((s) => {
             const isExpanded = expandedSeriesId === s.id;
 
             return (
