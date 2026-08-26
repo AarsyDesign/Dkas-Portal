@@ -77,18 +77,7 @@ export default function BookmarksModal({
                   </div>
 
                   <div className="flex items-center space-x-1 shrink-0">
-                    {!isBook && (
-                      <button
-                        onClick={() => {
-                          onPlayTrack(item);
-                          onClose();
-                        }}
-                        className="p-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 btn-press"
-                        title="Putar Audio"
-                      >
-                        <Play className="w-3.5 h-3.5 fill-white" />
-                      </button>
-                    )}
+
                     {link && (
                       <a
                         href={link}

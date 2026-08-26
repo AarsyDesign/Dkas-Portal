@@ -240,20 +240,15 @@ export default function SeriesView({
                         </div>
 
                         <div className="flex items-center space-x-1 shrink-0">
-                          <button
-                            onClick={() => onPlayTrack({
-                              ...ep,
-                              t: ep.title,
-                              u: s.ustadz,
-                              l: ep.link,
-                              m: ep.msg_id,
-                              d: ep.duration
-                            })}
-                            className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center space-x-1 shadow-sm btn-press"
+                          <a
+                            href={ep.link || `https://t.me/daftarkajiansalafy/${ep.msg_id}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold flex items-center space-x-1 shadow-sm btn-press"
                           >
-                            <Play className="w-3 h-3 fill-white" />
-                            <span className="text-[11px]">Putar</span>
-                          </button>
+                            <ExternalLink className="w-3 h-3" />
+                            <span className="text-[11px]">Buka di Telegram</span>
+                          </a>
 
                           <button
                             onClick={() => handleCopyLink(ep)}
@@ -263,17 +258,7 @@ export default function SeriesView({
                             {copiedId === ep.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                           </button>
 
-                          {ep.link && (
-                            <a
-                              href={ep.link}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="p-1.5 rounded-lg text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-950 btn-press"
-                              title="Buka di Telegram"
-                            >
-                              <ExternalLink className="w-3.5 h-3.5" />
-                            </a>
-                          )}
+                          </button>
                         </div>
                       </div>
                     ))}

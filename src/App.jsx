@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
-import AudioPlayer from './components/AudioPlayer';
 import ShareModal from './components/ShareModal';
 import BookmarksModal from './components/BookmarksModal';
 
@@ -33,10 +32,6 @@ export default function App() {
   const [asatidzahList, setAsatidzahList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Audio Player State
-  const [currentTrack, setCurrentTrack] = useState(null);
-  const [trackQueue, setTrackQueue] = useState([]);
-  const [trackIndex, setTrackIndex] = useState(0);
 
   // Modal State
   const [sharingItem, setSharingItem] = useState(null);
@@ -112,24 +107,6 @@ export default function App() {
     return bookmarks.some(b => (b.id || b.i || b.title || b.t) === itemId);
   };
 
-  // Play audio track
-  const handlePlayTrack = (track) => {
-    setCurrentTrack(track);
-  };
-
-  const handleNextTrack = () => {
-    if (trackQueue.length > 0 && trackIndex < trackQueue.length - 1) {
-      setTrackIndex(trackIndex + 1);
-      setCurrentTrack(trackQueue[trackIndex + 1]);
-    }
-  };
-
-  const handlePrevTrack = () => {
-    if (trackQueue.length > 0 && trackIndex > 0) {
-      setTrackIndex(trackIndex - 1);
-      setCurrentTrack(trackQueue[trackIndex - 1]);
-    }
-  };
 
   const handleFocusSearch = () => {
     if (activeTab !== 'catalog') {
@@ -175,7 +152,6 @@ export default function App() {
                 onNavigateTab={setActiveTab}
                 featuredBooks={books}
                 featuredSeries={seriesList}
-                onPlayTrack={handlePlayTrack}
               />
             )}
 
@@ -189,7 +165,6 @@ export default function App() {
                 setSelectedCategory={setSelectedCategory}
                 selectedUstadz={selectedUstadz}
                 setSelectedUstadz={setSelectedUstadz}
-                onPlayTrack={handlePlayTrack}
                 onShareItem={setSharingItem}
                 onToggleBookmark={handleToggleBookmark}
                 isBookmarked={isBookmarked}
@@ -209,7 +184,6 @@ export default function App() {
             {activeTab === 'series' && (
               <SeriesView
                 seriesList={seriesList}
-                onPlayTrack={handlePlayTrack}
                 onShareItem={setSharingItem}
               />
             )}
@@ -217,14 +191,6 @@ export default function App() {
         )}
       </main>
 
-      {/* Floating Audio Mini-Player */}
-      <AudioPlayer
-        currentTrack={currentTrack}
-        theme={theme}
-        onNext={handleNextTrack}
-        onPrev={handlePrevTrack}
-        onClose={() => setCurrentTrack(null)}
-      />
 
       {/* Share Modal */}
       {sharingItem && (
@@ -239,7 +205,6 @@ export default function App() {
         <BookmarksModal
           bookmarks={bookmarks}
           onRemoveBookmark={handleRemoveBookmark}
-          onPlayTrack={handlePlayTrack}
           onClose={() => setIsBookmarksOpen(false)}
           onNavigateTab={setActiveTab}
         />

@@ -36,8 +36,7 @@ export default function HomeView({
   onSelectCategory, 
   onNavigateTab, 
   searchQuery, 
-  setSearchQuery,
-  onPlayTrack
+  setSearchQuery
 }) {
   const [featuredBooks, setFeaturedBooks] = useState([]);
   const [featuredSeries, setFeaturedSeries] = useState([]);

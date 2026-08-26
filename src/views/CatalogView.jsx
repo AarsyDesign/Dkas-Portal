@@ -318,13 +318,15 @@ export default function CatalogView({
 
                 {/* Actions Footer */}
                 <div className="pt-2 border-t border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between gap-1">
-                  <button
-                    onClick={() => onPlayTrack(item)}
-                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow-sm btn-press"
+                  <a
+                    href={telegramLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow-sm btn-press"
                   >
-                    <Play className="w-3.5 h-3.5 fill-white" />
-                    <span>Putar</span>
-                  </button>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Buka di Telegram</span>
+                  </a>
 
                   <div className="flex items-center space-x-1">
                     <button
@@ -353,19 +355,6 @@ export default function CatalogView({
                       title="Salin Tautan"
                     >
                       {copiedId === item.i ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                    </button>
-
-                    {telegramLink && (
-                      <a
-                        href={telegramLink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-1.5 rounded-lg text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950 btn-press"
-                        title="Buka di Telegram"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    )}
                   </div>
                 </div>
               </div>
