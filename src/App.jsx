@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import ShareModal from './components/ShareModal';
 import BookmarksModal from './components/BookmarksModal';
+import PatchNotesModal from './components/PatchNotesModal';
 
 import HomeView from './views/HomeView';
 import CatalogView from './views/CatalogView';
 import LibraryView from './views/LibraryView';
+import KhutbahView from './views/KhutbahView';
 import SeriesView from './views/SeriesView';
 import { Loader2 } from 'lucide-react';
 
@@ -32,10 +34,10 @@ export default function App() {
   const [asatidzahList, setAsatidzahList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-
   // Modal State
   const [sharingItem, setSharingItem] = useState(null);
   const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
+  const [isPatchNotesOpen, setIsPatchNotesOpen] = useState(false);
 
   // Bookmarks State (Saved locally in user browser)
   const [bookmarks, setBookmarks] = useState(() => {
@@ -55,26 +57,41 @@ export default function App() {
     }
   }, [theme]);
 
-  // Load lightweight metadata from API
+  // Load lightweight metadata and home featured items from API
   useEffect(() => {
-    async function loadMetadata() {
+    async function loadInitialData() {
       setIsLoading(true);
       try {
-        const res = await fetch('/api/metadata');
-        if (res.ok) {
-          const data = await res.json();
+        const [metaRes, booksRes, seriesRes] = await Promise.all([
+          fetch('/api/metadata'),
+          fetch('/api/library?limit=4'),
+          fetch('/api/series?limit=3')
+        ]);
+
+        if (metaRes.ok) {
+          const data = await metaRes.json();
           setStats(data.stats);
           setAsatidzahList(data.asatidzah || []);
           setBookAuthors(data.authors || []);
         }
+
+        if (booksRes.ok) {
+          const bData = await booksRes.json();
+          setBooks(bData.items || []);
+        }
+
+        if (seriesRes.ok) {
+          const sData = await seriesRes.json();
+          setSeriesList(sData.items || []);
+        }
       } catch (err) {
-        console.error("Gagal memuat metadata portal:", err);
+        console.error("Gagal memuat data portal:", err);
       } finally {
         setIsLoading(false);
       }
     }
 
-    loadMetadata();
+    loadInitialData();
   }, []);
 
   // Save bookmarks to localStorage
@@ -124,6 +141,7 @@ export default function App() {
         setTheme={setTheme}
         bookmarksCount={bookmarks.length}
         onOpenBookmarks={() => setIsBookmarksOpen(true)}
+        onOpenPatchNotes={() => setIsPatchNotesOpen(true)}
         onFocusSearch={handleFocusSearch}
       />
 
@@ -181,9 +199,14 @@ export default function App() {
               />
             )}
 
+            {activeTab === 'khutbah' && (
+              <KhutbahView />
+            )}
+
             {activeTab === 'series' && (
               <SeriesView
                 seriesList={seriesList}
+                asatidzahList={asatidzahList}
                 onShareItem={setSharingItem}
               />
             )}
@@ -210,12 +233,27 @@ export default function App() {
         />
       )}
 
+      {/* Patch Notes Modal */}
+      <PatchNotesModal
+        isOpen={isPatchNotesOpen}
+        onClose={() => setIsPatchNotesOpen(false)}
+      />
+
       {/* Footer */}
       <footer className="border-t border-slate-200/80 dark:border-slate-800/80 py-6 text-center text-xs text-slate-500 dark:text-slate-400 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 space-y-1">
-          <p className="font-semibold text-slate-700 dark:text-slate-300">
-            Daftar Kajian Asatidzah Salafiyah & Perpustakaan Kitab Ulama
-          </p>
+        <div className="max-w-7xl mx-auto px-4 space-y-1.5">
+          <div className="flex items-center justify-center space-x-2">
+            <p className="font-semibold text-slate-700 dark:text-slate-300">
+              Daftar Kajian Asatidzah Salafiyah & Perpustakaan Kitab Ulama
+            </p>
+            <span className="text-slate-300 dark:text-slate-700">•</span>
+            <button
+              onClick={() => setIsPatchNotesOpen(true)}
+              className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center space-x-1"
+            >
+              <span>v2.0.0 Patch Notes</span>
+            </button>
+          </div>
           <p className="text-[11px]">
             Khazanah ilmiah Ahlussunnah wal Jama'ah • Diindeks dari channel Telegram <a href="https://t.me/daftarkajiansalafy" target="_blank" rel="noreferrer" className="text-emerald-700 dark:text-emerald-400 font-bold hover:underline">@daftarkajiansalafy</a>
           </p>

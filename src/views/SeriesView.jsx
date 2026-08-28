@@ -12,12 +12,14 @@ import {
   Share2, 
   Music, 
   Clock,
+  Loader2,
   X 
 } from 'lucide-react';
 import HighlightText from '../components/HighlightText';
 
 export default function SeriesView({ 
   seriesList = [], 
+  asatidzahList = [],
   onPlayTrack, 
   onShareItem 
 }) {
@@ -32,12 +34,6 @@ export default function SeriesView({
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Note: we can't easily extract distinct ustadz dynamically from the full DB 
-  // without a separate query. For now, we will rely on the global asatidzahList if we want it,
-  // but let's just keep the filter input as text or a static list if possible, or remove the dropdown 
-  // and just use search for ustadz. Actually, SeriesView had ustadzOptions. 
-  // We can just omit the dropdown if it's too complex or fetch it from /api/metadata.
   
   // Fetch data from API
   React.useEffect(() => {
@@ -107,7 +103,7 @@ export default function SeriesView({
               <span>Seri & Playlist Kajian Rutin</span>
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Koleksi {total.toLocaleString('id-ID')} seri kajian bersambung yang dikelompokkan per kitab dan pembahasan
+              Koleksi {total ? total.toLocaleString('id-ID') : '449'} seri kajian bersambung yang dikelompokkan per kitab dan pembahasan
             </p>
           </div>
 
@@ -139,7 +135,7 @@ export default function SeriesView({
         </div>
 
         {/* Ustadz Filter Dropdown */}
-        <div className="max-w-xs">
+        <div className="max-w-md">
           <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center space-x-1 mb-1">
             <User className="w-3 h-3 text-emerald-600" />
             <span>Filter Pemateri</span>
@@ -153,13 +149,22 @@ export default function SeriesView({
             className="w-full h-9 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 font-medium"
           >
             <option value="Semua">Semua Pemateri ({total} Seri)</option>
-            {/* TODO: If we need a dynamic ustadz list, we might want to fetch it separately from metadata API */}
+            {asatidzahList.map((u, idx) => (
+              <option key={idx} value={u.name}>
+                {u.name}
+              </option>
+            ))}
           </select>
         </div>
       </div>
 
       {/* Series Cards Grid */}
-      {items.length === 0 ? (
+      {isLoading ? (
+        <div className="p-16 text-center text-xs text-slate-500 dark:text-slate-400 space-y-3 glass-panel rounded-3xl flex flex-col items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+          <p className="font-semibold text-sm">Memuat playlist & seri kajian...</p>
+        </div>
+      ) : items.length === 0 ? (
         <div className="p-16 text-center text-xs text-slate-400 space-y-2 glass-panel rounded-3xl">
           <ListMusic className="w-8 h-8 mx-auto text-slate-300 stroke-1" />
           <p className="font-semibold text-slate-600 dark:text-slate-400">Tidak ada seri yang sesuai pencarian.</p>
@@ -256,8 +261,6 @@ export default function SeriesView({
                             title="Salin Link Telegram"
                           >
                             {copiedId === ep.id ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                          </button>
-
                           </button>
                         </div>
                       </div>

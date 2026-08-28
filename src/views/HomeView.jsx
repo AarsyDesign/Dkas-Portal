@@ -30,6 +30,20 @@ const POPULAR_PILLS = [
   { label: '📚 Kitab Ulama (PDF)', isLibrary: true },
 ];
 
+const SEARCH_SUGGESTIONS = [
+  "Ketik nama pemateri: Ustadz Muhammad Umar As Sewed...",
+  "Ketik nama kitab: Bulughul Maram karya Ibnu Hajar...",
+  "Ketik materi: Akidah Ahlussunnah wal Jama'ah...",
+  "Ketik tema khutbah: Naskah Khutbah Jum'at tematik...",
+  "Ketik nama pemateri: Ustadz Afifuddin As Sidawi...",
+  "Ketik nama qari: Murattal Syaikh Sa'ud Asy-Syuraim...",
+  "Ketik nama kitab: Zadul Ma'ad karya Ibnu Qayyim...",
+  "Ketik topik: Pembahasan Fiqh Shalat & Puasa...",
+  "Ketik nama seri: Syarah Kitabut Tauhid...",
+  "Ketik nama pemateri: Ustadz Usamah Faishol Mahri...",
+  "Ketik tafsir: Tafsir Al-Qur'an As-Sa'di..."
+];
+
 export default function HomeView({ 
   stats, 
   onSearch, 
@@ -40,6 +54,42 @@ export default function HomeView({
 }) {
   const [featuredBooks, setFeaturedBooks] = useState([]);
   const [featuredSeries, setFeaturedSeries] = useState([]);
+  const [currentPlaceholder, setCurrentPlaceholder] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [loopIndex, setLoopIndex] = useState(0);
+  const [typingSpeed, setTypingSpeed] = useState(60);
+
+  // Typewriter effect untuk placeholder dinamis
+  useEffect(() => {
+    if (searchQuery) return;
+
+    const currentPhrase = SEARCH_SUGGESTIONS[loopIndex % SEARCH_SUGGESTIONS.length];
+
+    const timer = setTimeout(() => {
+      if (!isDeleting) {
+        const nextText = currentPhrase.substring(0, currentPlaceholder.length + 1);
+        setCurrentPlaceholder(nextText);
+        setTypingSpeed(45);
+
+        if (nextText === currentPhrase) {
+          setTypingSpeed(2200);
+          setIsDeleting(true);
+        }
+      } else {
+        const nextText = currentPhrase.substring(0, currentPlaceholder.length - 1);
+        setCurrentPlaceholder(nextText);
+        setTypingSpeed(25);
+
+        if (nextText === "") {
+          setIsDeleting(false);
+          setLoopIndex((prev) => prev + 1);
+          setTypingSpeed(350);
+        }
+      }
+    }, typingSpeed);
+
+    return () => clearTimeout(timer);
+  }, [currentPlaceholder, isDeleting, loopIndex, typingSpeed, searchQuery]);
 
   useEffect(() => {
     async function fetchFeatured() {
@@ -62,6 +112,7 @@ export default function HomeView({
     }
     fetchFeatured();
   }, []);
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -94,16 +145,26 @@ export default function HomeView({
             </p>
           </div>
 
-          {/* Hero Big Search Box */}
-          <form onSubmit={handleSearchSubmit} className="relative max-w-xl mx-auto pt-2">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-400 pointer-events-none" />
+          {/* Hero Big Search Box with Dynamic Rotating Typewriter Placeholder */}
+          <form onSubmit={handleSearchSubmit} className="relative max-w-xl mx-auto pt-2 group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-400 transition-transform group-focus-within:scale-110 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Ketik judul kajian, nama asatidzah, nama kitab ulama..."
-              className="w-full h-12 sm:h-14 pl-12 pr-28 text-xs sm:text-sm rounded-2xl bg-white/10 dark:bg-slate-900/80 border border-white/20 dark:border-emerald-500/30 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-slate-900/90 shadow-2xl backdrop-blur-xl font-medium transition-all"
+              placeholder={searchQuery ? "" : (currentPlaceholder || "Ketik judul kajian, nama asatidzah, kitab ulama...")}
+              className="w-full h-12 sm:h-14 pl-12 pr-28 text-xs sm:text-sm rounded-2xl bg-white/10 dark:bg-slate-900/80 border border-white/20 dark:border-emerald-500/30 text-white placeholder-slate-400/90 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-slate-900/90 shadow-2xl backdrop-blur-xl font-medium transition-all"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-20 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                title="Hapus pencarian"
+              >
+                ✕
+              </button>
+            )}
             <button
               type="submit"
               className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md shadow-emerald-600/30 btn-press"

@@ -1,3 +1,5 @@
+import { buildSmartSearchSql } from './search_fuzzy.js';
+
 export async function onRequestGet(context) {
   const db = context.env.DB;
   
@@ -28,11 +30,10 @@ export async function onRequestGet(context) {
     }
     
     if (q.trim()) {
-      const searchTerms = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
-      for (const term of searchTerms) {
-        conditions.push("(LOWER(title) LIKE ? OR LOWER(ustadz) LIKE ? OR LOWER(kitab) LIKE ? OR LOWER(category) LIKE ?)");
-        const likeTerm = `%${term}%`;
-        params.push(likeTerm, likeTerm, likeTerm, likeTerm);
+      const { conditionSql, params: searchParams } = buildSmartSearchSql(q, ['title', 'ustadz', 'kitab', 'category']);
+      if (conditionSql) {
+        conditions.push(conditionSql);
+        params.push(...searchParams);
       }
     }
     

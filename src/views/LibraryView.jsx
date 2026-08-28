@@ -17,6 +17,7 @@ import {
   Users, 
   ArrowLeft, 
   GraduationCap,
+  Loader2,
   X 
 } from 'lucide-react';
 import HighlightText from '../components/HighlightText';
@@ -31,7 +32,7 @@ const CATEGORIES = [
   'Manhaj',
   'Bahasa Arab',
   'Sirah',
-  'Kitab Ulama'
+  'Al-Qur\'an'
 ];
 
 const getCoverTheme = (category) => {
@@ -64,12 +65,40 @@ const getCoverTheme = (category) => {
         accent: 'text-purple-300',
         badgeBg: 'bg-purple-900/80 text-purple-200 border-purple-700'
       };
+    case 'Adab & Akhlak':
+      return {
+        bg: 'from-sky-950 via-slate-950 to-cyan-900',
+        border: 'border-sky-500/40',
+        accent: 'text-sky-300',
+        badgeBg: 'bg-sky-900/80 text-sky-200 border-sky-700'
+      };
+    case 'Manhaj':
+      return {
+        bg: 'from-orange-950 via-slate-950 to-amber-900',
+        border: 'border-orange-500/40',
+        accent: 'text-orange-300',
+        badgeBg: 'bg-orange-900/80 text-orange-200 border-orange-700'
+      };
     case 'Bahasa Arab':
       return {
         bg: 'from-amber-950 via-slate-950 to-amber-900',
         border: 'border-amber-500/40',
         accent: 'text-amber-300',
         badgeBg: 'bg-amber-900/80 text-amber-200 border-amber-700'
+      };
+    case 'Sirah':
+      return {
+        bg: 'from-yellow-950 via-slate-950 to-stone-900',
+        border: 'border-yellow-600/40',
+        accent: 'text-yellow-300',
+        badgeBg: 'bg-yellow-900/80 text-yellow-200 border-yellow-700'
+      };
+    case 'Al-Qur\'an':
+      return {
+        bg: 'from-teal-950 via-slate-950 to-emerald-900',
+        border: 'border-teal-500/40',
+        accent: 'text-teal-300',
+        badgeBg: 'bg-teal-900/80 text-teal-200 border-teal-700'
       };
     default:
       return {
@@ -180,7 +209,7 @@ export default function LibraryView({
               <span>Perpustakaan Kitab & Dokumen PDF (المكتبة الإسلامية)</span>
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Koleksi {books.length.toLocaleString('id-ID')} judul kitab rujukan para ulama Ahlussunnah lengkap dengan cover digital dan jumlah halaman
+              Koleksi {total ? total.toLocaleString('id-ID') : '2.300+'} judul kitab rujukan para ulama Ahlussunnah lengkap dengan cover digital dan jumlah halaman
             </p>
           </div>
 
@@ -432,10 +461,10 @@ export default function LibraryView({
                       <ArrowLeft className="w-4 h-4" />
                     </button>
                     <span>Koleksi Kitab: <strong className="text-emerald-700 dark:text-emerald-400 font-bold">✍️ {selectedAuthor}</strong></span>
-                    <span className="text-slate-400">({filteredBooks.length} Judul Kitab)</span>
+                    <span className="text-slate-400">({total} Judul Kitab)</span>
                   </>
                 ) : (
-                  <span>Menampilkan <strong className="text-slate-900 dark:text-slate-100 font-mono">{filteredBooks.length}</strong> judul kitab</span>
+                  <span>Menampilkan <strong className="text-slate-900 dark:text-slate-100 font-mono">{total}</strong> judul kitab</span>
                 )}
               </div>
 
@@ -447,7 +476,12 @@ export default function LibraryView({
             </div>
 
             {/* Books Grid */}
-            {paginatedBooks.length === 0 ? (
+            {isLoading ? (
+              <div className="p-16 text-center text-xs text-slate-500 dark:text-slate-400 space-y-3 glass-panel rounded-3xl flex flex-col items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+                <p className="font-semibold text-sm">Memuat khazanah kitab & dokumen...</p>
+              </div>
+            ) : items.length === 0 ? (
               <div className="p-16 text-center text-xs text-slate-400 space-y-2 glass-panel rounded-3xl">
                 <BookOpen className="w-8 h-8 mx-auto text-slate-300 stroke-1" />
                 <p className="font-semibold text-slate-600 dark:text-slate-400">Tidak ada kitab yang sesuai.</p>
@@ -455,7 +489,7 @@ export default function LibraryView({
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                {paginatedBooks.map((book) => {
+                {items.map((book) => {
                   const isExpanded = !!expandedBookIds[book.id];
                   const isMultiVol = book.volumes_count > 1;
                   const theme = getCoverTheme(book.category);

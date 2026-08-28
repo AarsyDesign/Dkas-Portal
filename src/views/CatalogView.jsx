@@ -355,6 +355,7 @@ export default function CatalogView({
                       title="Salin Tautan"
                     >
                       {copiedId === item.i ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
                   </div>
                 </div>
               </div>
