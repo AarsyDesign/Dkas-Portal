@@ -18,6 +18,7 @@ import {
   Compass, 
   Send 
 } from 'lucide-react';
+import { getLibraryBooks, getSeriesCatalog } from '../services/apiClient';
 
 const POPULAR_PILLS = [
   { label: '🎓 Dauroh Ilmiah', category: 'Dauroh' },
@@ -94,17 +95,15 @@ export default function HomeView({
   useEffect(() => {
     async function fetchFeatured() {
       try {
-        const [booksRes, seriesRes] = await Promise.all([
-          fetch('/api/library?limit=4'),
-          fetch('/api/series?limit=3')
+        const [booksData, seriesData] = await Promise.all([
+          getLibraryBooks({ limit: 4 }),
+          getSeriesCatalog({ limit: 3 })
         ]);
-        if (booksRes.ok) {
-          const b = await booksRes.json();
-          setFeaturedBooks(b.items || []);
+        if (booksData) {
+          setFeaturedBooks(booksData.items || []);
         }
-        if (seriesRes.ok) {
-          const s = await seriesRes.json();
-          setFeaturedSeries(s.items || []);
+        if (seriesData) {
+          setFeaturedSeries(seriesData.items || []);
         }
       } catch (err) {
         console.error("Failed to fetch featured items", err);

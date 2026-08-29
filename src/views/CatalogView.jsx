@@ -17,6 +17,7 @@ import {
   ArrowDownUp
 } from 'lucide-react';
 import HighlightText from '../components/HighlightText';
+import CategoryScrollRow from '../components/CategoryScrollRow';
 
 const CATEGORIES = [
   'Semua',
@@ -230,27 +231,17 @@ export default function CatalogView({
           </div>
         </div>
 
-        {/* Quick Category Chips */}
-        <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs no-scrollbar touch-scroll">
-          {CATEGORIES.map((cat) => {
-            const isActive = selectedCategory === cat;
-            return (
-              <button
-                key={cat}
-                onClick={() => {
-                  setSelectedCategory(cat);
-                  setPage(1);
-                }}
-                className={`px-3 py-1.5 rounded-xl font-bold shrink-0 btn-press transition-colors ${
-                  isActive
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'
-                }`}
-              >
-                {cat}
-              </button>
-            );
-          })}
+        {/* Quick Category Chips with Mouse Wheel, Drag and Button Scroll */}
+        <div className="pt-1">
+          <CategoryScrollRow
+            categories={CATEGORIES}
+            selectedCategory={selectedCategory}
+            onSelectCategory={(cat) => {
+              setSelectedCategory(cat);
+              setPage(1);
+            }}
+            activeColor="bg-emerald-600 text-white shadow-md shadow-emerald-600/20 ring-1 ring-emerald-500"
+          />
         </div>
       </div>
 
