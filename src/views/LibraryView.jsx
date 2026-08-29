@@ -21,6 +21,7 @@ import {
   X 
 } from 'lucide-react';
 import HighlightText from '../components/HighlightText';
+import { getLibraryBooks } from '../services/apiClient';
 
 const CATEGORIES = [
   'Semua',
@@ -132,21 +133,19 @@ export default function LibraryView({
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch data from API
+  // Fetch data from API with automatic static fallback
   React.useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
       try {
-        const params = new URLSearchParams({
+        const data = await getLibraryBooks({
           q: searchQuery,
           category: selectedCategory,
           author: selectedAuthor,
           page: page,
           limit: pageSize
         });
-        const res = await fetch(`/api/library?${params.toString()}`);
-        if (res.ok) {
-          const data = await res.json();
+        if (data) {
           setItems(data.items || []);
           setTotal(data.total || 0);
           setTotalPages(data.totalPages || 0);
@@ -158,10 +157,9 @@ export default function LibraryView({
       }
     }
     
-    // Debounce the fetch slightly if typing in search query
     const timeoutId = setTimeout(() => {
       fetchData();
-    }, 300);
+    }, 250);
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery, selectedCategory, selectedAuthor, page, pageSize]);

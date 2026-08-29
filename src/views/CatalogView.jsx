@@ -42,6 +42,8 @@ const SORT_OPTIONS = [
   { id: 'duration_asc', label: '⏱️ Durasi Terpendek' }
 ];
 
+import { getAudioCatalog } from '../services/apiClient';
+
 export default function CatalogView({ 
   asatidzahList = [], 
   onPlayTrack, 
@@ -64,12 +66,12 @@ export default function CatalogView({
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch data from API
+  // Fetch data from API with automatic static JSON fallback
   React.useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
       try {
-        const params = new URLSearchParams({
+        const data = await getAudioCatalog({
           q: searchQuery,
           category: selectedCategory,
           ustadz: selectedUstadz,
@@ -77,9 +79,7 @@ export default function CatalogView({
           page: page,
           limit: pageSize
         });
-        const res = await fetch(`/api/audio?${params.toString()}`);
-        if (res.ok) {
-          const data = await res.json();
+        if (data) {
           setItems(data.items || []);
           setTotal(data.total || 0);
           setTotalPages(data.totalPages || 0);
@@ -91,10 +91,9 @@ export default function CatalogView({
       }
     }
     
-    // Debounce the fetch slightly if typing in search query
     const timeoutId = setTimeout(() => {
       fetchData();
-    }, 300);
+    }, 250);
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery, selectedCategory, selectedUstadz, sortBy, page, pageSize]);

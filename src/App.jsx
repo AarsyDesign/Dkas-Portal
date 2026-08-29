@@ -11,6 +11,8 @@ import KhutbahView from './views/KhutbahView';
 import SeriesView from './views/SeriesView';
 import { Loader2 } from 'lucide-react';
 
+import { getMetadata, getLibraryBooks, getSeriesCatalog } from './services/apiClient';
+
 export default function App() {
   // Theme State
   const [theme, setTheme] = useState(() => {
@@ -57,32 +59,29 @@ export default function App() {
     }
   }, [theme]);
 
-  // Load lightweight metadata and home featured items from API
+  // Load lightweight metadata and home featured items from API or resilient static fallback
   useEffect(() => {
     async function loadInitialData() {
       setIsLoading(true);
       try {
-        const [metaRes, booksRes, seriesRes] = await Promise.all([
-          fetch('/api/metadata'),
-          fetch('/api/library?limit=4'),
-          fetch('/api/series?limit=3')
+        const [metaData, booksData, seriesData] = await Promise.all([
+          getMetadata(),
+          getLibraryBooks({ limit: 4 }),
+          getSeriesCatalog({ limit: 3 })
         ]);
 
-        if (metaRes.ok) {
-          const data = await metaRes.json();
-          setStats(data.stats);
-          setAsatidzahList(data.asatidzah || []);
-          setBookAuthors(data.authors || []);
+        if (metaData) {
+          setStats(metaData.stats);
+          setAsatidzahList(metaData.asatidzah || []);
+          setBookAuthors(metaData.authors || []);
         }
 
-        if (booksRes.ok) {
-          const bData = await booksRes.json();
-          setBooks(bData.items || []);
+        if (booksData) {
+          setBooks(booksData.items || []);
         }
 
-        if (seriesRes.ok) {
-          const sData = await seriesRes.json();
-          setSeriesList(sData.items || []);
+        if (seriesData) {
+          setSeriesList(seriesData.items || []);
         }
       } catch (err) {
         console.error("Gagal memuat data portal:", err);

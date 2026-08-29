@@ -16,6 +16,7 @@ import {
   X 
 } from 'lucide-react';
 import HighlightText from '../components/HighlightText';
+import { getSeriesCatalog } from '../services/apiClient';
 
 export default function SeriesView({ 
   seriesList = [], 
@@ -35,20 +36,18 @@ export default function SeriesView({
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Fetch data from API
+  // Fetch data from API with automatic static JSON fallback
   React.useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
       try {
-        const params = new URLSearchParams({
+        const data = await getSeriesCatalog({
           q: searchQuery,
           ustadz: selectedUstadz,
           page: page,
           limit: pageSize
         });
-        const res = await fetch(`/api/series?${params.toString()}`);
-        if (res.ok) {
-          const data = await res.json();
+        if (data) {
           setItems(data.items || []);
           setTotal(data.total || 0);
           setTotalPages(data.totalPages || 0);
@@ -60,10 +59,9 @@ export default function SeriesView({
       }
     }
     
-    // Debounce the fetch slightly if typing in search query
     const timeoutId = setTimeout(() => {
       fetchData();
-    }, 300);
+    }, 250);
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery, selectedUstadz, page, pageSize]);
