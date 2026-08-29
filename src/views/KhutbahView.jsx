@@ -24,6 +24,7 @@ import {
   AlignRight
 } from 'lucide-react';
 import HighlightText from '../components/HighlightText';
+import CategoryScrollRow from '../components/CategoryScrollRow';
 
 export default function KhutbahView() {
   const [khutbahList, setKhutbahList] = useState([]);
@@ -34,6 +35,7 @@ export default function KhutbahView() {
   // Active Reader Modal State
   const [activeKhutbah, setActiveKhutbah] = useState(null);
   const [arabicFontSize, setArabicFontSize] = useState(24);
+  const [indoFontSize, setIndoFontSize] = useState(15);
   const [readerTab, setReaderTab] = useState('full'); // 'k1' | 'k2' | 'full'
   const [displayMode, setDisplayMode] = useState('bilingual'); // 'arabic' | 'indo' | 'bilingual'
   const [copySuccess, setCopySuccess] = useState(false);
@@ -207,20 +209,13 @@ export default function KhutbahView() {
             </div>
 
             {/* Category Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all btn-press ${
-                    selectedCategory === cat
-                      ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/20'
-                      : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
+            <div className="flex-1 max-w-full md:max-w-md">
+              <CategoryScrollRow
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onSelectCategory={(cat) => setSelectedCategory(cat)}
+                activeColor="bg-emerald-600 text-white shadow-sm shadow-emerald-600/20 ring-1 ring-emerald-500"
+              />
             </div>
           </div>
         </div>
@@ -412,27 +407,54 @@ export default function KhutbahView() {
               </div>
 
               {/* Font Size & Action Buttons */}
-              <div className="flex items-center space-x-1.5 ml-auto">
-                <div className="flex items-center space-x-1 bg-white dark:bg-slate-900 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase mr-1">Font</span>
-                  <button
-                    onClick={() => setArabicFontSize(prev => Math.max(18, prev - 2))}
-                    className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-                    title="Perkecil Font"
-                  >
-                    <ZoomOut className="w-3.5 h-3.5" />
-                  </button>
-                  <span className="text-[11px] font-bold w-5 text-center text-slate-700 dark:text-slate-200">
-                    {arabicFontSize}
-                  </span>
-                  <button
-                    onClick={() => setArabicFontSize(prev => Math.min(36, prev + 2))}
-                    className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
-                    title="Perbesar Font"
-                  >
-                    <ZoomIn className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+              <div className="flex items-center space-x-1.5 ml-auto flex-wrap gap-y-1">
+                {/* Arab Font Zoom */}
+                {(displayMode === 'arabic' || displayMode === 'bilingual') && (
+                  <div className="flex items-center space-x-1 bg-white dark:bg-slate-900 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mr-1">🇸🇦 Arab</span>
+                    <button
+                      onClick={() => setArabicFontSize(prev => Math.max(16, prev - 2))}
+                      className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                      title="Perkecil Font Arab"
+                    >
+                      <ZoomOut className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="text-[11px] font-bold w-5 text-center text-slate-700 dark:text-slate-200">
+                      {arabicFontSize}
+                    </span>
+                    <button
+                      onClick={() => setArabicFontSize(prev => Math.min(44, prev + 2))}
+                      className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                      title="Perbesar Font Arab"
+                    >
+                      <ZoomIn className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Indonesian Font Zoom */}
+                {(displayMode === 'indo' || displayMode === 'bilingual') && (
+                  <div className="flex items-center space-x-1 bg-white dark:bg-slate-900 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mr-1">🇮🇩 Terjemah</span>
+                    <button
+                      onClick={() => setIndoFontSize(prev => Math.max(12, prev - 1))}
+                      className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                      title="Perkecil Font Terjemahan"
+                    >
+                      <ZoomOut className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="text-[11px] font-bold w-5 text-center text-slate-700 dark:text-slate-200">
+                      {indoFontSize}
+                    </span>
+                    <button
+                      onClick={() => setIndoFontSize(prev => Math.min(32, prev + 1))}
+                      className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
+                      title="Perbesar Font Terjemahan"
+                    >
+                      <ZoomIn className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
 
                 <button
                   onClick={handleCopy}
@@ -514,16 +536,22 @@ export default function KhutbahView() {
 
                       {/* Full Indonesian Translation */}
                       {(displayMode === 'indo' || displayMode === 'bilingual') && (
-                        <div className={`text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-sans ${
-                          displayMode === 'bilingual' ? 'pt-3 border-t border-emerald-500/20 pl-3 border-l-2 border-l-emerald-500 bg-emerald-50/30 dark:bg-emerald-950/20 p-3 rounded-xl' : ''
-                        }`}>
+                        <div 
+                          style={{ fontSize: `${indoFontSize}px` }}
+                          className={`text-slate-700 dark:text-slate-300 leading-relaxed font-sans ${
+                            displayMode === 'bilingual' ? 'pt-3 border-t border-emerald-500/20 pl-3 border-l-2 border-l-emerald-500 bg-emerald-50/30 dark:bg-emerald-950/20 p-3 rounded-xl' : ''
+                          }`}
+                        >
                           {displayMode === 'bilingual' && (
-                            <div className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1 flex items-center space-x-1">
-                              <Languages className="w-3 h-3" />
+                            <div className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1.5 flex items-center space-x-1">
+                              <Languages className="w-3.5 h-3.5" />
                               <span>Terjemahan Lengkap:</span>
                             </div>
                           )}
-                          <p className="whitespace-pre-line font-medium text-slate-800 dark:text-slate-200">
+                          <p 
+                            style={{ fontSize: `${indoFontSize}px`, lineHeight: 1.8 }}
+                            className="whitespace-pre-line font-medium text-slate-800 dark:text-slate-200"
+                          >
                             {p.indonesian || p.translation || "Terjemahan sedang diproses..."}
                           </p>
                         </div>
