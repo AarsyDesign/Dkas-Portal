@@ -1,69 +1,63 @@
-import { buildSmartSearchSql } from './search_fuzzy.js';
+import { createSmartMatcher } from './search_fuzzy.js';
 
 export async function onRequestGet(context) {
-  const db = context.env.DB;
-  
-  if (!db) {
-    return Response.json({ error: "Database binding not found" }, { status: 500 });
-  }
-
   const url = new URL(context.request.url);
-  const q = url.searchParams.get('q') || '';
+  const q = (url.searchParams.get('q') || '').trim();
   const category = url.searchParams.get('category') || 'Semua';
   const author = url.searchParams.get('author') || 'Semua';
   const page = parseInt(url.searchParams.get('page')) || 1;
   const limit = parseInt(url.searchParams.get('limit')) || 12;
-  
+
   try {
-    let conditions = [];
-    let params = [];
-    
+    const dataUrl = new URL('/data/books.json', context.request.url).toString();
+    const res = await fetch(dataUrl);
+    if (!res.ok) {
+      return new Response(JSON.stringify({ error: 'Failed to fetch library books' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const booksData = await res.json();
+    let filtered = booksData;
+
     if (category !== 'Semua') {
-      conditions.push("category = ?");
-      params.push(category);
+      filtered = filtered.filter(item => item.category === category);
     }
-    
+
     if (author !== 'Semua') {
-      conditions.push("author = ?");
-      params.push(author);
+      filtered = filtered.filter(item => item.author === author);
     }
-    
-    if (q.trim()) {
-      const { conditionSql, params: searchParams } = buildSmartSearchSql(q, ['title', 'author', 'category', 'volumes']);
-      if (conditionSql) {
-        conditions.push(conditionSql);
-        params.push(...searchParams);
-      }
+
+    if (q) {
+      const matcher = createSmartMatcher(q);
+      filtered = filtered.filter(item => {
+        const searchTarget = `${item.title || ''} ${item.author || ''} ${item.category || ''}`;
+        return matcher(searchTarget);
+      });
     }
-    
-    let whereClause = conditions.length > 0 ? "WHERE " + conditions.join(" AND ") : "";
-    let orderClause = "ORDER BY id DESC";
 
-    const countQuery = `SELECT COUNT(*) as total FROM library_catalog ${whereClause}`;
-    const dataQuery = `SELECT * FROM library_catalog ${whereClause} ${orderClause} LIMIT ? OFFSET ?`;
-    
-    const countParams = [...params];
-    const dataParams = [...params, limit, (page - 1) * limit];
+    const total = filtered.length;
+    const totalPages = Math.ceil(total / limit);
+    const offset = (page - 1) * limit;
+    const items = filtered.slice(offset, offset + limit);
 
-    const [countResult, dataResult] = await Promise.all([
-      db.prepare(countQuery).bind(...countParams).first(),
-      db.prepare(dataQuery).bind(...dataParams).all()
-    ]);
-
-    // Parse JSON volumes
-    const items = dataResult.results.map(r => ({
-      ...r,
-      volumes: r.volumes ? JSON.parse(r.volumes) : []
-    }));
-
-    return Response.json({
+    return new Response(JSON.stringify({
       items,
-      total: countResult.total,
+      total,
       page,
       limit,
-      totalPages: Math.ceil(countResult.total / limit)
+      totalPages
+    }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=3600'
+      }
     });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }

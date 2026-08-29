@@ -1,30 +1,40 @@
 export async function onRequestGet(context) {
-  const db = context.env.DB;
-  
-  if (!db) {
-    return Response.json({ error: "Database binding not found" }, { status: 500 });
-  }
-  
   try {
-    const [categories, asatidzah, authors, stats] = await Promise.all([
-      db.prepare("SELECT name FROM categories").all(),
-      db.prepare("SELECT name, count FROM asatidzah ORDER BY count DESC").all(),
-      db.prepare("SELECT name, books_count, total_pages FROM authors ORDER BY books_count DESC").all(),
-      db.prepare("SELECT * FROM stats ORDER BY id DESC LIMIT 1").first()
+    const statsUrl = new URL('/data/stats.json', context.request.url).toString();
+    const asatidzahUrl = new URL('/data/asatidzah.json', context.request.url).toString();
+    const authorsUrl = new URL('/data/book_authors.json', context.request.url).toString();
+
+    const [statsRes, asatidzahRes, authorsRes] = await Promise.all([
+      fetch(statsUrl),
+      fetch(asatidzahUrl),
+      fetch(authorsUrl)
     ]);
 
-    return Response.json({
-      categories: categories.results.map(r => r.name),
-      asatidzah: asatidzah.results,
-      authors: authors.results,
-      stats: stats || null
-    }, {
+    const stats = statsRes.ok ? await statsRes.json() : null;
+    const asatidzah = asatidzahRes.ok ? await asatidzahRes.json() : [];
+    const authors = authorsRes.ok ? await authorsRes.json() : [];
+
+    const categories = [
+      'Semua', 'Akidah', 'Fiqh', 'Hadits', 'Tafsir', 
+      'Adab & Akhlak', 'Manhaj', 'Sirah', 'Dauroh', 
+      'Khutbah Jum\'at', 'Tanya Jawab', 'Tematik'
+    ];
+
+    return new Response(JSON.stringify({
+      categories,
+      asatidzah,
+      authors,
+      stats
+    }), {
       headers: {
-        'Cache-Control': 'public, max-age=3600',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=3600'
       }
     });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }

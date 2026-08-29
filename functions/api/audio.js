@@ -1,83 +1,79 @@
-import { buildSmartSearchSql } from './search_fuzzy.js';
+import { createSmartMatcher } from './search_fuzzy.js';
 
 export async function onRequestGet(context) {
-  const db = context.env.DB;
-  
-  if (!db) {
-    return Response.json({ error: "Database binding not found" }, { status: 500 });
-  }
-
   const url = new URL(context.request.url);
-  const q = url.searchParams.get('q') || '';
+  const q = (url.searchParams.get('q') || '').trim();
   const category = url.searchParams.get('category') || 'Semua';
   const ustadz = url.searchParams.get('ustadz') || 'Semua';
   const sortBy = url.searchParams.get('sortBy') || 'msg_desc';
   const page = parseInt(url.searchParams.get('page')) || 1;
   const limit = parseInt(url.searchParams.get('limit')) || 24;
-  
+
   try {
-    let conditions = [];
-    let params = [];
-    
+    const dataUrl = new URL('/data/audio_catalog.json', context.request.url).toString();
+    const res = await fetch(dataUrl);
+    if (!res.ok) {
+      return new Response(JSON.stringify({ error: 'Failed to fetch audio catalog' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const audioData = await res.json();
+    let filtered = audioData;
+
     if (category !== 'Semua') {
-      conditions.push("category = ?");
-      params.push(category);
+      filtered = filtered.filter(item => item.c === category);
     }
-    
+
     if (ustadz !== 'Semua') {
-      conditions.push("ustadz = ?");
-      params.push(ustadz);
+      filtered = filtered.filter(item => item.u === ustadz);
     }
-    
-    if (q.trim()) {
-      const { conditionSql, params: searchParams } = buildSmartSearchSql(q, ['title', 'ustadz', 'kitab', 'category']);
-      if (conditionSql) {
-        conditions.push(conditionSql);
-        params.push(...searchParams);
-      }
+
+    if (q) {
+      const matcher = createSmartMatcher(q);
+      filtered = filtered.filter(item => {
+        const searchTarget = `${item.t || ''} ${item.u || ''} ${item.k || ''} ${item.c || ''}`;
+        return matcher(searchTarget);
+      });
     }
-    
-    let whereClause = conditions.length > 0 ? "WHERE " + conditions.join(" AND ") : "";
-    
-    let orderClause = "ORDER BY msg_id DESC";
-    if (sortBy === 'msg_asc') orderClause = "ORDER BY msg_id ASC";
-    else if (sortBy === 'title_asc') orderClause = "ORDER BY title ASC";
-    else if (sortBy === 'title_desc') orderClause = "ORDER BY title DESC";
-    else if (sortBy === 'duration_desc') orderClause = "ORDER BY duration DESC";
-    else if (sortBy === 'duration_asc') orderClause = "ORDER BY duration ASC";
 
-    const countQuery = `SELECT COUNT(*) as total FROM audio_catalog ${whereClause}`;
-    const dataQuery = `SELECT * FROM audio_catalog ${whereClause} ${orderClause} LIMIT ? OFFSET ?`;
-    
-    const countParams = [...params];
-    const dataParams = [...params, limit, (page - 1) * limit];
+    if (sortBy === 'msg_asc') {
+      filtered = [...filtered].sort((a, b) => (a.m || 0) - (b.m || 0));
+    } else if (sortBy === 'title_asc') {
+      filtered = [...filtered].sort((a, b) => (a.t || '').localeCompare(b.t || ''));
+    } else if (sortBy === 'title_desc') {
+      filtered = [...filtered].sort((a, b) => (b.t || '').localeCompare(a.t || ''));
+    } else if (sortBy === 'duration_desc') {
+      filtered = [...filtered].sort((a, b) => (b.d || 0) - (a.d || 0));
+    } else if (sortBy === 'duration_asc') {
+      filtered = [...filtered].sort((a, b) => (a.d || 0) - (b.d || 0));
+    } else {
+      // default msg_desc
+      filtered = [...filtered].sort((a, b) => (b.m || 0) - (a.m || 0));
+    }
 
-    const [countResult, dataResult] = await Promise.all([
-      db.prepare(countQuery).bind(...countParams).first(),
-      db.prepare(dataQuery).bind(...dataParams).all()
-    ]);
+    const total = filtered.length;
+    const totalPages = Math.ceil(total / limit);
+    const offset = (page - 1) * limit;
+    const items = filtered.slice(offset, offset + limit);
 
-    // Map output to match existing app format to avoid large frontend changes
-    const items = dataResult.results.map(r => ({
-      i: r.id,
-      t: r.title,
-      u: r.ustadz,
-      k: r.kitab,
-      c: r.category,
-      d: r.duration,
-      s: r.size,
-      m: r.msg_id,
-      l: r.link
-    }));
-
-    return Response.json({
+    return new Response(JSON.stringify({
       items,
-      total: countResult.total,
+      total,
       page,
       limit,
-      totalPages: Math.ceil(countResult.total / limit)
+      totalPages
+    }), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=3600'
+      }
     });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }
