@@ -93,7 +93,7 @@ export default function App() {
     loadInitialData();
   }, []);
 
-  // Save bookmarks to localStorage
+  // Save bookmarks to localStorage & auto-activate reminder notification when saving a bookmark
   const handleToggleBookmark = (item) => {
     const itemId = item.id || item.i || item.title || item.t;
     setBookmarks(prev => {
@@ -103,6 +103,15 @@ export default function App() {
         updated = prev.filter(b => (b.id || b.i || b.title || b.t) !== itemId);
       } else {
         updated = [item, ...prev];
+        if (window.PushNotif) {
+          window.PushNotif.isSubscribed().then((active) => {
+            if (!active) {
+              window.PushNotif.subscribe().then(() => {
+                if (window.PushNotif?.syncBookmarks) window.PushNotif.syncBookmarks(updated);
+              });
+            }
+          });
+        }
       }
       localStorage.setItem('dkas_saved_bookmarks', JSON.stringify(updated));
       if (window.PushNotif?.syncBookmarks) window.PushNotif.syncBookmarks(updated);
