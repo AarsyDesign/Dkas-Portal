@@ -240,7 +240,10 @@ export default defineConfig({
     localApiDevPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg', 'pushnotif-sw.js'],
+      workbox: {
+        importScripts: ['https://pushnotif.biz.id/sdk/pushnotif-sw.js']
+      },
       manifest: {
         name: 'Daftar Kajian Salafy - Audio & Kitab Ulama',
         short_name: 'Daftar Kajian',
