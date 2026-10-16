@@ -105,6 +105,7 @@ export default function App() {
         updated = [item, ...prev];
       }
       localStorage.setItem('dkas_saved_bookmarks', JSON.stringify(updated));
+      if (window.PushNotif?.syncBookmarks) window.PushNotif.syncBookmarks(updated);
       return updated;
     });
   };
@@ -114,6 +115,7 @@ export default function App() {
     setBookmarks(prev => {
       const updated = prev.filter(b => (b.id || b.i || b.title || b.t) !== itemId);
       localStorage.setItem('dkas_saved_bookmarks', JSON.stringify(updated));
+      if (window.PushNotif?.syncBookmarks) window.PushNotif.syncBookmarks(updated);
       return updated;
     });
   };
