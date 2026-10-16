@@ -27,6 +27,18 @@
     <script src="https://pushnotif.biz.id/sdk/pushnotif.js"></script>
     <script>
       window.addEventListener("DOMContentLoaded", function () {
+        try {
+          if ("serviceWorker" in navigator && !localStorage.getItem("dkas_sw_v21_cleaned")) {
+            localStorage.setItem("dkas_sw_v21_cleaned", "1");
+            navigator.serviceWorker.getRegistrations().then(function (regs) {
+              regs.forEach(function (r) {
+                if (r.active && r.active.scriptURL && r.active.scriptURL.endsWith("/sw.js")) {
+                  r.unregister();
+                }
+              });
+            });
+          }
+        } catch (e) {}
         if (window.PushNotif) {
           window.PushNotif.init({
             appId: "app_e0dc6ae2",
