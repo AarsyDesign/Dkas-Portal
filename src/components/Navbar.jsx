@@ -62,12 +62,9 @@ export default function Navbar({
               />
             </div>
             <div className="min-w-0">
-              <div className="flex items-center space-x-1.5 flex-nowrap">
-                <span className="text-base sm:text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap">
+              <div className="flex items-center flex-nowrap">
+                <span className="text-[15px] sm:text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap">
                   Daftar Kajian
-                </span>
-                <span className="text-[11px] sm:text-xs px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-800 shrink-0">
-                  Salafy
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block truncate">
@@ -99,7 +96,7 @@ export default function Navbar({
           </nav>
 
           {/* Right Action Icons (Search, Bookmarks, Theme, Version, Telegram) */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+          <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
             {/* Quick Search Shortcut */}
             <button
               onClick={onFocusSearch}
