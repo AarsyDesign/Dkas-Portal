@@ -5,6 +5,7 @@ import {
   Library, 
   ListMusic, 
   Bookmark, 
+  Bell,
   Sun, 
   Moon, 
   Send,
@@ -107,6 +108,24 @@ export default function Navbar({
             >
               <Search className="w-4 h-4 text-emerald-600" />
               <span className="hidden sm:inline">Cari</span>
+            </button>
+
+            {/* Strategic PushNotif Opt-In Bell Button */}
+            <button
+              onClick={async () => {
+                if (window.PushNotif) {
+                  try {
+                    await window.PushNotif.subscribe();
+                    alert("Alhamdulillah, pengingat kajian ilmiah berhasil diaktifkan di perangkat ini!");
+                  } catch (e) {
+                    alert("Gagal mengaktifkan notifikasi: " + (e.message || e));
+                  }
+                }
+              }}
+              className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 border border-slate-200/80 dark:border-slate-800/80 btn-press shrink-0"
+              title="Aktifkan Notifikasi Pengingat Kajian"
+            >
+              <Bell className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             </button>
 
             {/* Bookmarks / Saved Button */}

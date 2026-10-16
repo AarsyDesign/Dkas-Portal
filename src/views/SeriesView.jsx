@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   ListMusic, 
+  Bell,
   Search, 
   Play, 
   ExternalLink, 
@@ -95,11 +96,30 @@ export default function SeriesView({
       {/* Header & Filter Card */}
       <div className="p-4 sm:p-6 rounded-3xl glass-panel space-y-4 shadow-sm border border-slate-200/80 dark:border-slate-800/80">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center space-x-2">
-              <ListMusic className="w-5 h-5 text-emerald-600" />
-              <span>Seri & Playlist Kajian Rutin</span>
-            </h2>
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center space-x-2">
+                <ListMusic className="w-5 h-5 text-emerald-600" />
+                <span>Seri & Playlist Kajian Rutin</span>
+              </h2>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (window.PushNotif) {
+                    try {
+                      await window.PushNotif.subscribe();
+                      alert("Alhamdulillah, pengingat seri kajian rutin berhasil diaktifkan!");
+                    } catch (e) {
+                      alert("Gagal mengaktifkan pengingat: " + (e.message || e));
+                    }
+                  }
+                }}
+                className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/80 hover:bg-emerald-100 dark:hover:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[11px] font-bold btn-press transition-colors"
+              >
+                <Bell className="w-3.5 h-3.5" />
+                <span>Ingatkan Kajian Rutin</span>
+              </button>
+            </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Koleksi {total ? total.toLocaleString('id-ID') : '449'} seri kajian bersambung yang dikelompokkan per kitab dan pembahasan
             </p>
