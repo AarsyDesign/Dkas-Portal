@@ -31,9 +31,20 @@
           if ("serviceWorker" in navigator && !localStorage.getItem("dkas_sw_v21_cleaned")) {
             localStorage.setItem("dkas_sw_v21_cleaned", "1");
             navigator.serviceWorker.getRegistrations().then(function (regs) {
-              regs.forEach(function (r) {
+              var hadOld = false;
+              Promise.all(regs.map(function (r) {
                 if (r.active && r.active.scriptURL && r.active.scriptURL.endsWith("/sw.js")) {
-                  r.unregister();
+                  hadOld = true;
+                  return r.unregister();
+                }
+                return Promise.resolve();
+              })).then(function () {
+                if (hadOld && window.caches) {
+                  caches.keys().then(function (keys) {
+                    Promise.all(keys.map(function (k) { return caches.delete(k); })).then(function () {
+                      window.location.reload();
+                    });
+                  });
                 }
               });
             });

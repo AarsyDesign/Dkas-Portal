@@ -242,6 +242,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg', 'pushnotif-sw.js'],
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         importScripts: ['https://pushnotif.biz.id/sdk/pushnotif-sw.js']
       },
       manifest: {
