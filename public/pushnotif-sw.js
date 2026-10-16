@@ -16,7 +16,7 @@ self.addEventListener("push", (event) => {
     title: "Pesan Baru",
     body: "Anda menerima pemberitahuan baru.",
     url: "/",
-    icon: "/static/icon-192.png",
+    icon: "/pwa-192x192.png",
   };
 
   if (event.data) {

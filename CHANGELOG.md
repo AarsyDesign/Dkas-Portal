@@ -4,6 +4,17 @@ Catatan rilis dan pembaruan fitur untuk portal publik digital **Daftar Kajian Sa
 
 ---
 
+## 🔔 [v2.1.0] - 2026-10-16 : Fitur Lonceng Notifikasi Pintar & Pengingat Bookmark Harian
+
+### ✨ Fitur Baru & Peningkatan:
+- **🔔 Saklar Lonceng Notifikasi (1-Klik ON/OFF)**:
+  - Tombol lonceng interaktif di bilah navigasi atas untuk mengaktifkan atau menonaktifkan Web Push Notification kapan saja tanpa perlu registrasi akun atau nomor HP.
+- **📖 Pengingat Kajian & Kitab Tersimpan Setiap Jam 09.00 Pagi**:
+  - Sinkronisasi cerdas dengan fitur *Bookmark*: jamaah yang menyimpan kajian/kitab akan menerima 1 pengingat harian pada pukul 09.00 WIB sesuai judul kitab/kajian yang disimpan (`+N kajian/kitab lainnya` jika menyimpan banyak item).
+  - Bebas spam: pengingat otomatis tidak dikirim apabila daftar *Bookmark* kosong.
+
+---
+
 ## 🚀 [v2.0.0] - 2026-08-29 : Major Production Release - Khutbah Bilingual Reader, Multivolume Library & Unified Series
 
 ### ✨ Fitur Baru & Peningkatan Utama:

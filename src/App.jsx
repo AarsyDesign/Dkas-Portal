@@ -252,7 +252,7 @@ export default function App() {
               onClick={() => setIsPatchNotesOpen(true)}
               className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center space-x-1"
             >
-              <span>v2.0.0 Patch Notes</span>
+              <span>v2.1.0 Patch Notes</span>
             </button>
           </div>
           <p className="text-[11px]">

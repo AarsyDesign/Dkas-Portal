@@ -1,15 +1,38 @@
 import React from 'react';
-import { X, Sparkles, BookOpen, Search, CheckCircle2, History, Layers } from 'lucide-react';
+import { X, Sparkles, BookOpen, Search, CheckCircle2, History, Layers, Bell, Bookmark } from 'lucide-react';
 
 export default function PatchNotesModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   const patches = [
     {
+      version: 'v2.1.0',
+      date: '16 Oktober 2026',
+      title: 'Fitur Lonceng Notifikasi Pintar & Pengingat Kajian/Kitab Tersimpan',
+      isLatest: true,
+      highlights: [
+        {
+          icon: Bell,
+          title: 'Saklar Lonceng Notifikasi 1-Klik (ON / OFF)',
+          desc: 'Aktifkan atau matikan pemberitahuan kajian langsung dari ikon Lonceng di bilah navigasi atas tanpa perlu login atau nomor HP.'
+        },
+        {
+          icon: Bookmark,
+          title: 'Pengingat Harian Kajian & Kitab Tersimpan (Jam 09.00 Pagi)',
+          desc: 'Jika Anda menyimpan audio kajian atau kitab di Bookmark, sistem otomatis mengirimkan 1 pengingat lembut setiap pukul 09.00 pagi sesuai judul bacaan/simakan Anda.'
+        },
+        {
+          icon: CheckCircle2,
+          title: 'Bebas Spam & Privasi Terjaga',
+          desc: 'Jika terdapat banyak simpanan, notifikasi otomatis diringkas menjadi 1 pesan rapi, dan otomatis berhenti jika daftar Bookmark kosong.'
+        }
+      ]
+    },
+    {
       version: 'v2.0.0',
       date: '29 Agustus 2026',
       title: 'Major Production Release: Khutbah Bilingual Reader, Multivolume Library & Unified Series',
-      isLatest: true,
+      isLatest: false,
       highlights: [
         {
           icon: BookOpen,
