@@ -107,17 +107,18 @@ export default function SeriesView({
                 onClick={async () => {
                   if (window.PushNotif) {
                     try {
-                      await window.PushNotif.subscribe();
-                      alert("Alhamdulillah, pengingat seri kajian rutin berhasil diaktifkan!");
+                      await window.PushNotif.toggle();
                     } catch (e) {
-                      alert("Gagal mengaktifkan pengingat: " + (e.message || e));
+                      if (window.PushNotif.showToast) {
+                        window.PushNotif.showToast(e.message || String(e), false);
+                      }
                     }
                   }
                 }}
                 className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/80 hover:bg-emerald-100 dark:hover:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[11px] font-bold btn-press transition-colors"
               >
                 <Bell className="w-3.5 h-3.5" />
-                <span>Ingatkan Kajian Rutin</span>
+                <span>Pengingat Kajian (ON / OFF)</span>
               </button>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">

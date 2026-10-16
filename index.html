@@ -24,12 +24,12 @@
   </head>
   <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-white min-h-screen overflow-x-hidden">
     <div id="root"></div>
-    <script src="https://pushnotif.biz.id/sdk/pushnotif.js"></script>
+    <script src="https://pushnotif.biz.id/sdk/pushnotif.js?v=1.4"></script>
     <script>
       window.addEventListener("DOMContentLoaded", function () {
         try {
-          if ("serviceWorker" in navigator && !localStorage.getItem("dkas_sw_v22_cleaned")) {
-            localStorage.setItem("dkas_sw_v22_cleaned", "1");
+          if ("serviceWorker" in navigator && !localStorage.getItem("dkas_sw_v23_cleaned")) {
+            localStorage.setItem("dkas_sw_v23_cleaned", "1");
             navigator.serviceWorker.getRegistrations().then(function (regs) {
               var hadOld = false;
               Promise.all(regs.map(function (r) {

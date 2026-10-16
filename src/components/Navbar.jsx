@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, 
   Music, 
@@ -6,6 +6,7 @@ import {
   ListMusic, 
   Bookmark, 
   Bell,
+  BellOff,
   Sun, 
   Moon, 
   Send,
@@ -25,6 +26,25 @@ export default function Navbar({
   onOpenPatchNotes,
   onFocusSearch
 }) {
+  const [pushEnabled, setPushEnabled] = useState(false);
+
+  useEffect(() => {
+    const syncState = async () => {
+      if (window.PushNotif && typeof window.PushNotif.isSubscribed === 'function') {
+        const on = await window.PushNotif.isSubscribed();
+        setPushEnabled(on);
+      }
+    };
+    syncState();
+    const handler = (e) => {
+      if (e && e.detail && typeof e.detail.subscribed === 'boolean') {
+        setPushEnabled(e.detail.subscribed);
+      }
+    };
+    window.addEventListener('pushnotif:state', handler);
+    return () => window.removeEventListener('pushnotif:state', handler);
+  }, []);
+
   const toggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
@@ -107,22 +127,31 @@ export default function Navbar({
               <span className="hidden sm:inline">Cari</span>
             </button>
 
-            {/* Strategic PushNotif Opt-In Bell Button */}
+            {/* Strategic PushNotif Toggle (ON/OFF) Bell Button */}
             <button
               onClick={async () => {
                 if (window.PushNotif) {
                   try {
-                    await window.PushNotif.subscribe();
-                    alert("Alhamdulillah, pengingat kajian ilmiah berhasil diaktifkan di perangkat ini!");
+                    const res = await window.PushNotif.toggle();
+                    setPushEnabled(Boolean(res && res.subscribed));
                   } catch (e) {
-                    alert("Gagal mengaktifkan notifikasi: " + (e.message || e));
+                    if (window.PushNotif.showToast) {
+                      window.PushNotif.showToast(e.message || String(e), false);
+                    }
                   }
                 }
               }}
-              className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 border border-slate-200/80 dark:border-slate-800/80 btn-press shrink-0"
-              title="Aktifkan Notifikasi Pengingat Kajian"
+              className={`relative p-2 rounded-xl border btn-press shrink-0 transition-colors ${
+                pushEnabled
+                  ? 'bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/50'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 border-slate-200/80 dark:border-slate-800/80'
+              }`}
+              title={pushEnabled ? 'Notifikasi Aktif (Ketuk untuk Matikan / OFF)' : 'Aktifkan Notifikasi Pengingat Kajian'}
             >
-              <Bell className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <Bell className={`w-4 h-4 ${pushEnabled ? 'text-emerald-500 fill-emerald-500/25' : 'text-emerald-600 dark:text-emerald-400'}`} />
+              {pushEnabled && (
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-950" />
+              )}
             </button>
 
             {/* Bookmarks / Saved Button */}
