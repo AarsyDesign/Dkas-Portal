@@ -328,7 +328,7 @@ export default function App() {
             </button>
           </div>
           <p className="text-[11px]">
-            Khazanah ilmiah Ahlussunnah wal Jama'ah • Diindeks dari channel Telegram <a href="https://t.me/daftarkajiansalafy" target="_blank" rel="noreferrer" className="text-emerald-700 dark:text-emerald-400 font-bold hover:underline">@daftarkajiansalafy</a>
+            Khazanah ilmiah Ahlussunnah wal Jama'ah • Diindeks dari channel Telegram <a href="https://t.me/daftarkajiansalafy" target="_blank" rel="noreferrer" className="text-emerald-700 dark:text-emerald-400 font-bold hover:underline">@daftarkajiansalafy</a> • Notifikasi didukung oleh <a href="https://pushnotif.biz.id" target="_blank" rel="noopener" className="text-emerald-700 dark:text-emerald-400 font-semibold hover:underline">PushNotif</a>
           </p>
         </div>
       </footer>
