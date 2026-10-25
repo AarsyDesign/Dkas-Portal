@@ -4,7 +4,7 @@ Catatan rilis dan pembaruan fitur untuk portal publik digital **Daftar Kajian Sa
 
 ---
 
-## 🔔 [v2.1.0] - 2026-10-16 : Fitur Lonceng Notifikasi Pintar & Pengingat Bookmark Harian
+## 🚀 [v2.1.0] - 2026-10-16 : Performance Overhaul, Smart Search & Lonceng Notifikasi Web Push
 
 ### ✨ Fitur Baru & Peningkatan:
 - **🔔 Saklar Lonceng Notifikasi (1-Klik ON/OFF)**:
@@ -12,6 +12,24 @@ Catatan rilis dan pembaruan fitur untuk portal publik digital **Daftar Kajian Sa
 - **📖 Pengingat Kajian & Kitab Tersimpan Setiap Jam 09.00 Pagi**:
   - Sinkronisasi cerdas dengan fitur *Bookmark*: jamaah yang menyimpan kajian/kitab akan menerima 1 pengingat harian pada pukul 09.00 WIB sesuai judul kitab/kajian yang disimpan (`+N kajian/kitab lainnya` jika menyimpan banyak item).
   - Bebas spam: pengingat otomatis tidak dikirim apabila daftar *Bookmark* kosong.
+- **⚡ Optimasi Muatan Khutbah 99.7% (34.5 KB vs 10.4 MB)**:
+  - Pemisahan metadata katalog naskah (`khutbah_catalog.json`, 34.5 KB) dari payload naskah utuh (10.4 MB).
+  - Pemuatan teks Arab & terjemahan secara dinamis (*on-demand*) saat membuka naskah, menghemat kuota seluler secara dramatis.
+  - Pembaruan indikator naskah khutbah aktual (**87 naskah lengkap**).
+- **🚀 Cloudflare Pages In-Memory Worker Cache**:
+  - Penambahan *module-level memory caching* pada endpoint `/api/audio`, `/api/khutbah`, `/api/library`, `/api/series`, dan `/api/metadata`. Waktu respon *warm request* turun drastis ke <5ms tanpa re-parse JSON 7-10 MB.
+- **🔍 Smart Islamic Fuzzy & Phonetic Matcher di Client-Side**:
+  - Integrasi mesin pencari konsep syar'i dan toleransi saltik Arab-Indonesia langsung ke fallback statis/offline `apiClient.js`.
+- **🧭 Hash Routing & Sinkronisasi Tombol Back Browser**:
+  - Navigasi tab terhubung langsung ke URL hash (`#catalog`, `#library`, `#khutbah`, `#series`).
+  - Menekan tombol **Back** pada smartphone tidak lagi mengeluarkan pengguna dari aplikasi web.
+- **⌨️ Pintasan Keyboard Global**:
+  - Tekan `Ctrl + K` atau `/` dari halaman manapun untuk langsung membuka katalog dan memfokuskan kolom pencarian.
+  - Tekan `Escape` untuk menutup modal baca khutbah, bookmark, patch notes, dan modal share.
+- **🖼️ Social Sharing Preview (Open Graph & Twitter Card)**:
+  - Penambahan banner resmi resolusi tinggi `public/og-cover.png` (1200x630) bernuansa hijau zamrud & emas, memperbaiki preview berbagi link di WhatsApp, Telegram, Facebook, dan Twitter/X.
+- **🎛️ Penataan Filter Audio & Chip Kategori**:
+  - Tata letak filter 2-kolom responsif untuk Pemateri dan Urutan Hasil, diperkuat baris chip kategori interaktif (`CategoryScrollRow`) yang dapat digeser mulus.
 
 ---
 

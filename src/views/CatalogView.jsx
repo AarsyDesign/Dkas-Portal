@@ -168,7 +168,7 @@ export default function CatalogView({
         </div>
 
         {/* Filters & Sorting Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
           {/* Ustadz Select Dropdown */}
           <div className="space-y-1">
             <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center space-x-1">
@@ -186,26 +186,6 @@ export default function CatalogView({
               <option value="Semua">Semua Asatidzah ({asatidzahList.length})</option>
               {asatidzahList.map((u, i) => (
                 <option key={i} value={u.name}>{u.name} ({u.count})</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Category Dropdown */}
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center space-x-1">
-              <Filter className="w-3 h-3 text-emerald-600" />
-              <span>Filter Kategori</span>
-            </label>
-            <select
-              value={selectedCategory}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value);
-                setPage(1);
-              }}
-              className="w-full h-9 px-3 text-xs rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 font-medium"
-            >
-              {CATEGORIES.map((c, i) => (
-                <option key={i} value={c}>{c}</option>
               ))}
             </select>
           </div>

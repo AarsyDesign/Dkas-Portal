@@ -45,7 +45,8 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const payloadData = event.notification.data || {};
-  const targetUrl = payloadData.url || "/";
+  const rawUrl = String(payloadData.url || "/").trim();
+  const targetUrl = /^(https?:\/\/|\/)/i.test(rawUrl) ? rawUrl : "/";
   const campaignId = payloadData.campaign_id || "";
 
   const trackPromise = campaignId
