@@ -136,10 +136,10 @@ export default function Navbar({
             <button
               onClick={onOpenPatchNotes}
               className="px-2 py-1.5 sm:px-2.5 sm:py-2 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-emerald-50 dark:hover:bg-emerald-950 text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-300 border border-slate-200/80 dark:border-slate-800/80 text-[11px] font-mono font-bold flex items-center space-x-1 btn-press shrink-0 transition-colors"
-              title="Catatan Rilis & Pembaruan (v2.0.0)"
+              title="Catatan Rilis & Pembaruan (v2.1.0)"
             >
               <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
-              <span className="hidden sm:inline">v2.0.0</span>
+              <span className="hidden sm:inline">v2.1.0</span>
             </button>
 
             {/* Telegram Channel Button */}

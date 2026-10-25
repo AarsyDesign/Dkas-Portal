@@ -190,18 +190,23 @@ function localApiDevPlugin() {
           }
 
           if (pathname === '/api/khutbah') {
-            const khutbahData = loadJson('khutbahTexts', 'khutbah_texts.json') || [];
-            const q = (url.searchParams.get('q') || '').trim();
-            const category = url.searchParams.get('category') || 'Semua';
             const id = url.searchParams.get('id');
+            const mode = url.searchParams.get('mode');
 
-            if (id) {
-              const item = khutbahData.find(k => String(k.id) === String(id) || String(k.msg_id) === String(id));
-              res.setHeader('Content-Type', 'application/json');
-              return res.end(JSON.stringify(item || { error: 'Not found' }));
+            if (id || mode === 'full') {
+              const fullData = loadJson('khutbahTexts', 'khutbah_texts.json') || [];
+              if (id) {
+                const item = fullData.find(k => String(k.id) === String(id) || String(k.telegram_msg_id) === String(id) || String(k.msg_id) === String(id));
+                res.setHeader('Content-Type', 'application/json');
+                return res.end(JSON.stringify(item || { error: 'Not found' }));
+              }
             }
 
-            let filtered = khutbahData;
+            const catalogData = loadJson('khutbahCatalog', 'khutbah_catalog.json') || loadJson('khutbahTexts', 'khutbah_texts.json') || [];
+            const q = (url.searchParams.get('q') || '').trim();
+            const category = url.searchParams.get('category') || 'Semua';
+
+            let filtered = catalogData;
 
             if (category !== 'Semua') {
               filtered = filtered.filter(item => item.category === category);
@@ -210,7 +215,7 @@ function localApiDevPlugin() {
             if (q) {
               const matcher = createSmartMatcher(q);
               filtered = filtered.filter(item => {
-                const searchTarget = `${item.title_ar || ''} ${item.title_id || ''} ${item.summary_id || ''} ${item.full_arabic_text || ''} ${item.full_indonesian_text || ''}`;
+                const searchTarget = `${item.title_ar || ''} ${item.title_id || ''} ${item.summary_id || ''} ${item.category || ''}`;
                 return matcher(searchTarget);
               });
             }

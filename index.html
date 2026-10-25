@@ -16,6 +16,15 @@
     <meta property="og:title" content="Daftar Kajian Salafy - Audio & Kitab Ulama" />
     <meta property="og:description" content="Khazanah dan Arsip Digital Audio Kajian serta Perpustakaan Kitab Ulama Ahlussunnah." />
     <meta property="og:image" content="/og-cover.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Daftar Kajian Salafy Portal Banner" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Daftar Kajian Salafy - Audio & Kitab Ulama" />
+    <meta name="twitter:description" content="Khazanah dan Arsip Digital Audio Kajian serta Perpustakaan Kitab Ulama Ahlussunnah." />
+    <meta name="twitter:image" content="/og-cover.png" />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,5 +34,9 @@
   <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-white min-h-screen">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+   <script src="https://pushnotif.biz.id/sdk/pushnotif.js"></script>
+<script>
+  PushNotif.init({ appId: "app_ca77d86d", apiBase: "https://pushnotif.biz.id", autoPrompt: true });
+</script>
   </body>
 </html>

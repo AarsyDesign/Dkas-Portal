@@ -1,5 +1,7 @@
 import { createSmartMatcher } from './search_fuzzy.js';
 
+let _cachedAudio = null;
+
 export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const q = (url.searchParams.get('q') || '').trim();
@@ -10,16 +12,19 @@ export async function onRequestGet(context) {
   const limit = parseInt(url.searchParams.get('limit')) || 24;
 
   try {
-    const dataUrl = new URL('/data/audio_catalog.json', context.request.url).toString();
-    const res = await fetch(dataUrl);
-    if (!res.ok) {
-      return new Response(JSON.stringify({ error: 'Failed to fetch audio catalog' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
+    if (!_cachedAudio) {
+      const dataUrl = new URL('/data/audio_catalog.json', context.request.url).toString();
+      const res = await fetch(dataUrl);
+      if (!res.ok) {
+        return new Response(JSON.stringify({ error: 'Failed to fetch audio catalog' }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      _cachedAudio = await res.json();
     }
 
-    const audioData = await res.json();
+    const audioData = _cachedAudio;
     let filtered = audioData;
 
     if (category !== 'Semua') {

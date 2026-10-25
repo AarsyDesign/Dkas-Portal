@@ -1,5 +1,7 @@
 import { createSmartMatcher } from './search_fuzzy.js';
 
+let _cachedBooks = null;
+
 export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const q = (url.searchParams.get('q') || '').trim();
@@ -9,16 +11,19 @@ export async function onRequestGet(context) {
   const limit = parseInt(url.searchParams.get('limit')) || 12;
 
   try {
-    const dataUrl = new URL('/data/books.json', context.request.url).toString();
-    const res = await fetch(dataUrl);
-    if (!res.ok) {
-      return new Response(JSON.stringify({ error: 'Failed to fetch library books' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
+    if (!_cachedBooks) {
+      const dataUrl = new URL('/data/books.json', context.request.url).toString();
+      const res = await fetch(dataUrl);
+      if (!res.ok) {
+        return new Response(JSON.stringify({ error: 'Failed to fetch library books' }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      _cachedBooks = await res.json();
     }
 
-    const booksData = await res.json();
+    const booksData = _cachedBooks;
     let filtered = booksData;
 
     if (category !== 'Semua') {

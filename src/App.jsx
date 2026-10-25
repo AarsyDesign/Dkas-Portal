@@ -19,8 +19,16 @@ export default function App() {
     return localStorage.getItem('dkas_theme') || 'dark';
   });
 
-  // Active Tab: 'home' | 'catalog' | 'library' | 'series'
-  const [activeTab, setActiveTab] = useState('home');
+  // Helper to extract tab from URL hash
+  const getTabFromHash = () => {
+    const hash = (window.location.hash || '').replace('#', '').trim().toLowerCase();
+    const validTabs = ['home', 'catalog', 'library', 'khutbah', 'series'];
+    if (validTabs.includes(hash)) return hash;
+    return 'home';
+  };
+
+  // Active Tab: 'home' | 'catalog' | 'library' | 'khutbah' | 'series'
+  const [activeTab, setActiveTab] = useState(() => getTabFromHash());
 
   // Search & Global Filter State
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,6 +48,57 @@ export default function App() {
   const [sharingItem, setSharingItem] = useState(null);
   const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
   const [isPatchNotesOpen, setIsPatchNotesOpen] = useState(false);
+
+  // Navigate Tab with URL Hash & Browser History
+  const handleNavigateTab = (tab) => {
+    setActiveTab(tab);
+    const targetHash = tab === 'home' ? '' : `#${tab}`;
+    if (window.location.hash !== targetHash) {
+      if (tab === 'home') {
+        window.history.pushState(null, '', window.location.pathname + window.location.search);
+      } else {
+        window.location.hash = tab;
+      }
+    }
+  };
+
+  // Listen to browser Back/Forward (hashchange & popstate)
+  useEffect(() => {
+    const handleHashSync = () => {
+      const tab = getTabFromHash();
+      setActiveTab(tab);
+    };
+    window.addEventListener('hashchange', handleHashSync);
+    window.addEventListener('popstate', handleHashSync);
+    return () => {
+      window.removeEventListener('hashchange', handleHashSync);
+      window.removeEventListener('popstate', handleHashSync);
+    };
+  }, []);
+
+  // Global Keyboard Shortcuts (Ctrl+K or / to focus search, Esc to dismiss modal)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (isBookmarksOpen) setIsBookmarksOpen(false);
+        if (isPatchNotesOpen) setIsPatchNotesOpen(false);
+        if (sharingItem) setSharingItem(null);
+      }
+      if (
+        (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) ||
+        ((e.ctrlKey || e.metaKey) && e.key === 'k')
+      ) {
+        e.preventDefault();
+        handleNavigateTab('catalog');
+        setTimeout(() => {
+          const input = document.querySelector('input[type="text"]');
+          if (input) input.focus();
+        }, 60);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [isBookmarksOpen, isPatchNotesOpen, sharingItem]);
 
   // Bookmarks State (Saved locally in user browser)
   const [bookmarks, setBookmarks] = useState(() => {
@@ -126,8 +185,12 @@ export default function App() {
 
   const handleFocusSearch = () => {
     if (activeTab !== 'catalog') {
-      setActiveTab('catalog');
+      handleNavigateTab('catalog');
     }
+    setTimeout(() => {
+      const input = document.querySelector('input[type="text"]');
+      if (input) input.focus();
+    }, 60);
   };
 
   return (
@@ -135,7 +198,7 @@ export default function App() {
       {/* Top Navbar */}
       <Navbar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleNavigateTab}
         theme={theme}
         setTheme={setTheme}
         bookmarksCount={bookmarks.length}
@@ -160,13 +223,13 @@ export default function App() {
                 setSearchQuery={setSearchQuery}
                 onSearch={(q) => {
                   setSearchQuery(q);
-                  setActiveTab('catalog');
+                  handleNavigateTab('catalog');
                 }}
                 onSelectCategory={(cat) => {
                   setSelectedCategory(cat);
-                  setActiveTab('catalog');
+                  handleNavigateTab('catalog');
                 }}
-                onNavigateTab={setActiveTab}
+                onNavigateTab={handleNavigateTab}
                 featuredBooks={books}
                 featuredSeries={seriesList}
               />
@@ -228,7 +291,7 @@ export default function App() {
           bookmarks={bookmarks}
           onRemoveBookmark={handleRemoveBookmark}
           onClose={() => setIsBookmarksOpen(false)}
-          onNavigateTab={setActiveTab}
+          onNavigateTab={handleNavigateTab}
         />
       )}
 
@@ -250,7 +313,7 @@ export default function App() {
               onClick={() => setIsPatchNotesOpen(true)}
               className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center space-x-1"
             >
-              <span>v2.0.0 Patch Notes</span>
+              <span>v2.1.0 Patch Notes</span>
             </button>
           </div>
           <p className="text-[11px]">

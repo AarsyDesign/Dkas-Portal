@@ -1,4 +1,5 @@
 // Bulletproof API Client with Instant Static Fallback & In-Memory Cache
+import { createSmartMatcher } from '../../functions/api/search_fuzzy.js';
 
 let _cache = {
   stats: null,
@@ -53,13 +54,13 @@ export async function getMetadata() {
       safeFetchJson('/data/book_authors.json')
     ]);
     _cache.stats = stats || {
-      total_kajian: 36841,
-      total_audio: 32494,
-      total_books: 1403,
-      total_series: 442,
-      total_asatidzah: 137,
-      total_book_authors: 75,
-      total_khutbah: 30
+      total_kajian: 36907,
+      total_audio: 32380,
+      total_books: 1628,
+      total_series: 451,
+      total_asatidzah: 135,
+      total_book_authors: 48,
+      total_khutbah: 87
     };
     _cache.asatidzah = asatidzah || [];
     _cache.authors = authors || [];
@@ -103,11 +104,10 @@ export async function getAudioCatalog({ q = '', category = 'Semua', ustadz = 'Se
   }
 
   if (q.trim()) {
-    const qNorm = normalizeText(q);
-    const qTokens = qNorm.split(' ').filter(Boolean);
+    const matcher = createSmartMatcher(q);
     filtered = filtered.filter(item => {
-      const target = normalizeText(`${item.t || ''} ${item.u || ''} ${item.k || ''} ${item.c || ''}`);
-      return qTokens.every(token => target.includes(token));
+      const searchTarget = `${item.t || ''} ${item.u || ''} ${item.k || ''} ${item.c || ''}`;
+      return matcher(searchTarget);
     });
   }
 
@@ -158,11 +158,11 @@ export async function getLibraryBooks({ q = '', category = 'Semua', author = 'Se
   }
 
   if (q.trim()) {
-    const qNorm = normalizeText(q);
-    const qTokens = qNorm.split(' ').filter(Boolean);
+    const matcher = createSmartMatcher(q);
     filtered = filtered.filter(item => {
-      const target = normalizeText(`${item.title || ''} ${item.author || ''} ${item.category || ''}`);
-      return qTokens.every(token => target.includes(token));
+      const volTitles = (item.volumes || []).map(v => v.title || '').join(' ');
+      const searchTarget = `${item.title || ''} ${item.author || ''} ${item.category || ''} ${volTitles}`;
+      return matcher(searchTarget);
     });
   }
 
@@ -194,11 +194,10 @@ export async function getSeriesCatalog({ q = '', ustadz = 'Semua', page = 1, lim
   }
 
   if (q.trim()) {
-    const qNorm = normalizeText(q);
-    const qTokens = qNorm.split(' ').filter(Boolean);
+    const matcher = createSmartMatcher(q);
     filtered = filtered.filter(item => {
-      const target = normalizeText(`${item.name || item.title || ''} ${item.ustadz || ''} ${item.category || ''}`);
-      return qTokens.every(token => target.includes(token));
+      const searchTarget = `${item.name || item.title || ''} ${item.ustadz || ''} ${item.category || ''}`;
+      return matcher(searchTarget);
     });
   }
 

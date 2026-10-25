@@ -1,5 +1,7 @@
 import { createSmartMatcher } from './search_fuzzy.js';
 
+let _cachedSeries = null;
+
 export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const q = (url.searchParams.get('q') || '').trim();
@@ -8,16 +10,19 @@ export async function onRequestGet(context) {
   const limit = parseInt(url.searchParams.get('limit')) || 12;
 
   try {
-    const dataUrl = new URL('/data/series.json', context.request.url).toString();
-    const res = await fetch(dataUrl);
-    if (!res.ok) {
-      return new Response(JSON.stringify({ error: 'Failed to fetch series catalog' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
+    if (!_cachedSeries) {
+      const dataUrl = new URL('/data/series.json', context.request.url).toString();
+      const res = await fetch(dataUrl);
+      if (!res.ok) {
+        return new Response(JSON.stringify({ error: 'Failed to fetch series catalog' }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      _cachedSeries = await res.json();
     }
 
-    const seriesData = await res.json();
+    const seriesData = _cachedSeries;
     let filtered = seriesData;
 
     if (ustadz !== 'Semua') {

@@ -6,25 +6,48 @@ export default function PatchNotesModal({ isOpen, onClose }) {
 
   const patches = [
     {
+      version: 'v2.1.0',
+      date: '14 Oktober 2026',
+      title: 'Performance Overhaul, Smart Client Search & Seamless Navigation',
+      isLatest: true,
+      highlights: [
+        {
+          icon: Sparkles,
+          title: 'Muat Khutbah Instan 99.7% Lebih Cepat',
+          desc: 'Katalog naskah dipisahkan menjadi 34.5 KB (sebelumnya 10.4 MB) dan pemuatan teks Arab-Indo secara on-demand saat dibuka. Indikator akurat 87 naskah khutbah lengkap.'
+        },
+        {
+          icon: Search,
+          title: 'Smart Islamic Matcher di Klien & Cache Worker',
+          desc: 'Pencarian sinonim syar\'i & toleransi saltik aktif di sisi browser saat offline. Cloudflare Worker kini menggunakan memory caching instan (<5ms).'
+        },
+        {
+          icon: BookOpen,
+          title: 'Hash Deep-Linking, Back Button & Keyboard Shortcuts',
+          desc: 'Navigasi URL hash (#catalog, #khutbah, dll) dengan dukungan tombol Back HP tanpa keluar aplikasi, serta shortcut Ctrl+K dan Escape.'
+        }
+      ]
+    },
+    {
       version: 'v2.0.0',
       date: '29 Agustus 2026',
       title: 'Major Production Release: Khutbah Bilingual Reader, Multivolume Library & Unified Series',
-      isLatest: true,
+      isLatest: false,
       highlights: [
         {
           icon: BookOpen,
           title: 'Khazanah Naskah Khutbah Jum\'at & Mode Mimbar',
-          desc: '30 Naskah Khutbah Jum\'at pilihan lengkap dengan 781 paragraf terjemahan dwibahasa (Arab ⇄ Indonesia), pembagian Khutbah 1 & 2, pembesar font mimbar, serta fitur salin dan cetak naskah.'
+          desc: 'Naskah Khutbah Jum\'at pilihan lengkap dengan teks terjemahan dwibahasa (Arab ⇄ Indonesia), pembagian Khutbah 1 & 2, pembesar font mimbar, serta fitur salin dan cetak naskah.'
         },
         {
           icon: Layers,
           title: 'Konsolidasi Perpustakaan Multivolume & Mu\'jam Ulama',
-          desc: '1.403 Buku Induk Ulama Salaf dengan pengelompokan jilid interaktif (2.843 PDF) dan 75 Ulama Salaf terverifikasi.'
+          desc: '1.628 Buku Induk Ulama Salaf dengan pengelompokan jilid interaktif dan Ulama Salaf terverifikasi.'
         },
         {
           icon: Sparkles,
           title: 'Presisi Seri Playlist & Dynamic Hero Search',
-          desc: 'Pembersihan 4.596 rekaman playlist (Murattal, Kitab Salaf, Kajian Asatidzah), restrukturisasi Topik Media Dakwah serta bilah pencarian beranimasi dinamis.'
+          desc: 'Pembersihan ribuan rekaman playlist, restrukturisasi Topik Media Dakwah serta bilah pencarian beranimasi dinamis.'
         }
       ]
     },

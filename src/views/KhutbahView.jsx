@@ -21,7 +21,8 @@ import {
   ArrowRight,
   ArrowLeft,
   AlignLeft,
-  AlignRight
+  AlignRight,
+  Loader2
 } from 'lucide-react';
 import HighlightText from '../components/HighlightText';
 import CategoryScrollRow from '../components/CategoryScrollRow';
@@ -34,6 +35,7 @@ export default function KhutbahView() {
   
   // Active Reader Modal State
   const [activeKhutbah, setActiveKhutbah] = useState(null);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [arabicFontSize, setArabicFontSize] = useState(24);
   const [indoFontSize, setIndoFontSize] = useState(15);
   const [readerTab, setReaderTab] = useState('full'); // 'k1' | 'k2' | 'full'
@@ -41,6 +43,7 @@ export default function KhutbahView() {
   const [copySuccess, setCopySuccess] = useState(false);
   
   const readerBodyRef = useRef(null);
+  const detailCacheRef = useRef({});
 
   useEffect(() => {
     async function loadKhutbah() {
@@ -50,17 +53,23 @@ export default function KhutbahView() {
           const data = await res.json();
           setKhutbahList(data.items || data || []);
         } else {
-          // Fallback to static JSON file
-          const fallbackRes = await fetch('/data/khutbah_texts.json');
+          // Fallback to lightweight static catalog (34 KB)
+          const fallbackRes = await fetch('/data/khutbah_catalog.json');
           if (fallbackRes.ok) {
             const fallbackData = await fallbackRes.json();
             setKhutbahList(fallbackData || []);
+          } else {
+            const fullRes = await fetch('/data/khutbah_texts.json');
+            if (fullRes.ok) {
+              const fullData = await fullRes.json();
+              setKhutbahList(fullData || []);
+            }
           }
         }
       } catch (err) {
-        console.error('Failed to load khutbah texts', err);
+        console.error('Failed to load khutbah catalog', err);
         try {
-          const fallbackRes = await fetch('/data/khutbah_texts.json');
+          const fallbackRes = await fetch('/data/khutbah_catalog.json');
           if (fallbackRes.ok) {
             const fallbackData = await fallbackRes.json();
             setKhutbahList(fallbackData || []);
@@ -74,6 +83,17 @@ export default function KhutbahView() {
     }
     loadKhutbah();
   }, []);
+
+  // Listen for Escape key to close reader modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && activeKhutbah) {
+        setActiveKhutbah(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeKhutbah]);
 
   // Scroll to top whenever tab or active khutbah changes
   useEffect(() => {
@@ -135,9 +155,54 @@ export default function KhutbahView() {
     return activeKhutbah.paragraphs || [];
   }, [activeKhutbah, readerTab]);
 
-  const handleOpenReader = (k, tab = 'full') => {
-    setActiveKhutbah(k);
+  const handleOpenReader = async (k, tab = 'full') => {
     setReaderTab(tab);
+
+    // If paragraphs are already present, open immediately
+    if (k.paragraphs && k.paragraphs.length > 0) {
+      setActiveKhutbah(k);
+      return;
+    }
+
+    // If cached in detailCacheRef, open immediately
+    if (detailCacheRef.current[k.id]) {
+      setActiveKhutbah(detailCacheRef.current[k.id]);
+      return;
+    }
+
+    // Set preview with loading indicator
+    setActiveKhutbah({ ...k, paragraphs: [] });
+    setIsDetailLoading(true);
+
+    try {
+      const res = await fetch(`/api/khutbah?id=${k.id}`);
+      if (res.ok) {
+        const fullItem = await res.json();
+        if (fullItem && !fullItem.error) {
+          detailCacheRef.current[k.id] = fullItem;
+          setActiveKhutbah(fullItem);
+          return;
+        }
+      }
+
+      // Fallback: fetch from /data/khutbah_texts.json
+      const fallbackRes = await fetch('/data/khutbah_texts.json');
+      if (fallbackRes.ok) {
+        const allFull = await fallbackRes.json();
+        allFull.forEach(item => {
+          detailCacheRef.current[item.id] = item;
+        });
+        const found = allFull.find(item => String(item.id) === String(k.id));
+        if (found) {
+          setActiveKhutbah(found);
+          return;
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load khutbah detail', err);
+    } finally {
+      setIsDetailLoading(false);
+    }
   };
 
   const handleCopy = () => {
@@ -173,7 +238,7 @@ export default function KhutbahView() {
               <span>Naskah & Khazanah Khatib</span>
             </span>
             <span className="px-3 py-1 rounded-xl bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 font-bold text-xs border border-amber-200/80 dark:border-amber-800/80">
-              30 Naskah Khutbah Lengkap & Terjemah
+              {khutbahList.length ? `${khutbahList.length} Naskah Khutbah Lengkap & Terjemah` : '87 Naskah Khutbah Lengkap & Terjemah'}
             </span>
           </div>
 
@@ -236,8 +301,8 @@ export default function KhutbahView() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredKhutbah.map((k) => {
-            const k1Count = getKhutbah1List(k).length;
-            const k2Count = getKhutbah2List(k).length;
+            const k1Count = k.k1_count || getKhutbah1List(k).length || Math.ceil((k.paragraphs_count || 1) / 2);
+            const k2Count = k.k2_count || getKhutbah2List(k).length || Math.floor((k.paragraphs_count || 1) / 2);
             return (
               <div
                 key={k.id || k.msg_id}
@@ -506,7 +571,12 @@ export default function KhutbahView() {
 
               {/* Paragraphs Display */}
               <div className="space-y-6 max-w-3xl mx-auto">
-                {activeParagraphs.length === 0 ? (
+                {isDetailLoading ? (
+                  <div className="p-16 text-center text-xs text-slate-500 dark:text-slate-400 space-y-3 flex flex-col items-center justify-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+                    <p className="font-semibold text-sm">Menyiapkan teks Arab & terjemahan naskah...</p>
+                  </div>
+                ) : activeParagraphs.length === 0 ? (
                   <div className="p-12 text-center text-slate-400 glass-panel rounded-2xl">
                     <p className="font-bold text-sm">Tidak ada paragraf pada bagian ini.</p>
                   </div>
