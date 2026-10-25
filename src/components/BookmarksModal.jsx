@@ -55,7 +55,7 @@ export default function BookmarksModal({
               const isBook = item.type === 'book' || item.volumes_count;
               const title = item.t || item.title;
               const ustadz = item.u || item.ustadz || item.author;
-              const link = item.l || item.telegram_link || (item.m ? `https://t.me/daftarkajiansalafy/${item.m}` : '');
+              const link = item.l || item.telegram_link || item.link || item.volumes?.[0]?.link || (item.m ? `https://t.me/daftarkajiansalafy/${item.m}` : '');
 
               return (
                 <div

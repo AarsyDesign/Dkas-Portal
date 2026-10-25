@@ -457,7 +457,8 @@ export default function KhutbahView() {
                       : 'text-slate-600 dark:text-slate-400'
                   }`}
                 >
-                  <span>🇸🇦 Arab</span>
+                  <AlignRight className="w-3.5 h-3.5" />
+                  <span>Teks Arab</span>
                 </button>
                 <button
                   onClick={() => setDisplayMode('indo')}
@@ -467,7 +468,8 @@ export default function KhutbahView() {
                       : 'text-slate-600 dark:text-slate-400'
                   }`}
                 >
-                  <span>🇮🇩 Terjemah</span>
+                  <Languages className="w-3.5 h-3.5" />
+                  <span>Terjemah</span>
                 </button>
               </div>
 
@@ -476,7 +478,7 @@ export default function KhutbahView() {
                 {/* Arab Font Zoom */}
                 {(displayMode === 'arabic' || displayMode === 'bilingual') && (
                   <div className="flex items-center space-x-1 bg-white dark:bg-slate-900 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-800">
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mr-1">🇸🇦 Arab</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mr-1">Arab</span>
                     <button
                       onClick={() => setArabicFontSize(prev => Math.max(16, prev - 2))}
                       className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
@@ -500,7 +502,7 @@ export default function KhutbahView() {
                 {/* Indonesian Font Zoom */}
                 {(displayMode === 'indo' || displayMode === 'bilingual') && (
                   <div className="flex items-center space-x-1 bg-white dark:bg-slate-900 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-800">
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mr-1">🇮🇩 Terjemah</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mr-1">Terjemah</span>
                     <button
                       onClick={() => setIndoFontSize(prev => Math.max(12, prev - 1))}
                       className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"
@@ -548,14 +550,29 @@ export default function KhutbahView() {
               {/* Header Box in Reader */}
               <div className="p-4 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
                 <div className="flex justify-center">
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold border inline-flex items-center space-x-1.5 ${
                     readerTab === 'k1' 
                       ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
                       : readerTab === 'k2'
                       ? 'bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border-sky-300 dark:border-sky-800'
                       : 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800'
                   }`}>
-                    {readerTab === 'k1' ? '🟢 Sedang Membaca: KHUTBAH PERTAMA' : readerTab === 'k2' ? '🔵 Sedang Membaca: KHUTBAH KEDUA' : '📜 Sedang Membaca: NASKAH LENGKAP (Khutbah 1 & 2)'}
+                    {readerTab === 'k1' ? (
+                      <>
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                        <span>Sedang Membaca: KHUTBAH PERTAMA</span>
+                      </>
+                    ) : readerTab === 'k2' ? (
+                      <>
+                        <span className="w-2 h-2 rounded-full bg-sky-500 shrink-0" />
+                        <span>Sedang Membaca: KHUTBAH KEDUA</span>
+                      </>
+                    ) : (
+                      <>
+                        <ScrollText className="w-3.5 h-3.5 shrink-0" />
+                        <span>Sedang Membaca: NASKAH LENGKAP (Khutbah 1 & 2)</span>
+                      </>
+                    )}
                   </span>
                 </div>
                 <h1 dir="rtl" className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 font-serif leading-relaxed text-center">

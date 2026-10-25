@@ -18,6 +18,7 @@ import {
   ArrowLeft, 
   GraduationCap,
   Loader2,
+  PenTool,
   X 
 } from 'lucide-react';
 import HighlightText from '../components/HighlightText';
@@ -190,6 +191,11 @@ export default function LibraryView({
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const formatSize = (bytes) => {
     if (!bytes) return '-';
     const mb = bytes / (1024 * 1024);
@@ -208,7 +214,7 @@ export default function LibraryView({
               <span>Perpustakaan Kitab & Dokumen PDF (المكتبة الإسلامية)</span>
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Koleksi {total ? total.toLocaleString('id-ID') : '2.300+'} judul kitab rujukan para ulama Ahlussunnah lengkap dengan cover digital dan jumlah halaman
+              Koleksi {total ? total.toLocaleString('id-ID') : '1.628'} judul kitab rujukan para ulama Ahlussunnah lengkap dengan cover digital dan jumlah halaman
             </p>
           </div>
 
@@ -322,7 +328,7 @@ export default function LibraryView({
               >
                 <div className="flex items-center space-x-2.5">
                   <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold text-xs shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                    ✍️
+                    <PenTool className="w-4 h-4" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <h4 className="font-bold text-xs text-slate-900 dark:text-slate-100 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400" title={a.name}>
@@ -449,7 +455,13 @@ export default function LibraryView({
                     >
                       <ArrowLeft className="w-4 h-4" />
                     </button>
-                    <span>Koleksi Kitab: <strong className="text-emerald-700 dark:text-emerald-400 font-bold">✍️ {selectedAuthor}</strong></span>
+                    <span className="inline-flex items-center space-x-1.5">
+                      <span>Koleksi Kitab:</span>
+                      <strong className="text-emerald-700 dark:text-emerald-400 font-bold inline-flex items-center space-x-1">
+                        <PenTool className="w-3.5 h-3.5 shrink-0" />
+                        <span>{selectedAuthor}</span>
+                      </strong>
+                    </span>
                     <span className="text-slate-400">({total} Judul Kitab)</span>
                   </>
                 ) : (
@@ -519,10 +531,10 @@ export default function LibraryView({
 
                         {/* Islamic Ornamental Medallion & Title */}
                         <div className="space-y-2 py-2 pl-2 text-center">
-                          <div className="flex items-center justify-center space-x-1 text-amber-400/70 text-xs">
-                            <span>❖</span>
+                          <div className="flex items-center justify-center space-x-1.5 text-amber-400/70 text-xs">
+                            <span className="w-1.5 h-1.5 rotate-45 bg-amber-400/70 inline-block shrink-0" />
                             <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-300">{book.category || 'Kitab'}</span>
-                            <span>❖</span>
+                            <span className="w-1.5 h-1.5 rotate-45 bg-amber-400/70 inline-block shrink-0" />
                           </div>
 
                           <h4 
@@ -536,8 +548,8 @@ export default function LibraryView({
 
                         {/* Author Ribbon */}
                         <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] pl-2">
-                          <p className="font-bold text-slate-200 truncate flex items-center space-x-1 max-w-[80%]" title={book.author}>
-                            <span className="text-amber-400">✍️</span>
+                          <p className="font-bold text-slate-200 truncate flex items-center space-x-1.5 max-w-[80%]" title={book.author}>
+                            <PenTool className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                             <span className="truncate"><HighlightText text={book.author} highlight={searchQuery} /></span>
                           </p>
                           <span className="text-[10px] font-mono text-slate-400 shrink-0">
@@ -652,7 +664,7 @@ export default function LibraryView({
             {totalPages > 1 && (
               <div className="pt-4 flex items-center justify-center space-x-2">
                 <button
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  onClick={() => handlePageChange(Math.max(1, page - 1))}
                   disabled={page === 1}
                   className="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 disabled:opacity-40 btn-press"
                 >
@@ -664,7 +676,7 @@ export default function LibraryView({
                 </span>
 
                 <button
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
                   disabled={page === totalPages}
                   className="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 disabled:opacity-40 btn-press"
                 >

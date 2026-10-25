@@ -14,6 +14,7 @@ import {
   Music, 
   Clock,
   Loader2,
+  Mic,
   X 
 } from 'lucide-react';
 import HighlightText from '../components/HighlightText';
@@ -84,6 +85,11 @@ export default function SeriesView({
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const formatDuration = (secs) => {
     if (!secs || isNaN(secs) || secs <= 0) return '-';
     const m = Math.floor(secs / 60);
@@ -122,7 +128,7 @@ export default function SeriesView({
               </button>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Koleksi {total ? total.toLocaleString('id-ID') : '449'} seri kajian bersambung yang dikelompokkan per kitab dan pembahasan
+              Koleksi {total ? total.toLocaleString('id-ID') : '451'} seri kajian bersambung yang dikelompokkan per kitab dan pembahasan
             </p>
           </div>
 
@@ -215,8 +221,8 @@ export default function SeriesView({
                       <HighlightText text={s.name} highlight={searchQuery} />
                     </h3>
 
-                    <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold flex items-center space-x-1">
-                      <span>🎙️</span>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold flex items-center space-x-1.5">
+                      <Mic className="w-3.5 h-3.5 shrink-0" />
                       <span><HighlightText text={s.ustadz} highlight={searchQuery} /></span>
                     </p>
                   </div>
@@ -257,8 +263,14 @@ export default function SeriesView({
                             <p className="font-bold text-slate-900 dark:text-slate-100 truncate text-xs" title={ep.title}>
                               {ep.title}
                             </p>
-                            <p className="text-[10px] text-slate-500 font-mono">
-                              {ep.duration > 0 ? `⏱️ ${formatDuration(ep.duration)} • ` : ''}#{ep.msg_id}
+                            <p className="text-[10px] text-slate-500 font-mono flex items-center space-x-1">
+                              {ep.duration > 0 && (
+                                <span className="inline-flex items-center space-x-1">
+                                  <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                                  <span>{formatDuration(ep.duration)} •</span>
+                                </span>
+                              )}
+                              <span>#{ep.msg_id}</span>
                             </p>
                           </div>
                         </div>
@@ -296,7 +308,7 @@ export default function SeriesView({
       {totalPages > 1 && (
         <div className="pt-4 flex items-center justify-center space-x-2">
           <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
+            onClick={() => handlePageChange(Math.max(1, page - 1))}
             disabled={page === 1}
             className="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 disabled:opacity-40 btn-press"
           >
@@ -308,7 +320,7 @@ export default function SeriesView({
           </span>
 
           <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
             disabled={page === totalPages}
             className="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 disabled:opacity-40 btn-press"
           >

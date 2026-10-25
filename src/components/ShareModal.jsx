@@ -5,6 +5,7 @@ import {
   Copy, 
   Check, 
   Share2, 
+  MessageCircle,
   ExternalLink 
 } from 'lucide-react';
 
@@ -13,11 +14,11 @@ export default function ShareModal({ item, onClose }) {
 
   if (!item) return null;
 
-  const title = item.t || item.title || 'Kajian Salafy';
+  const title = item.t || item.title || item.name || 'Kajian Salafy';
   const ustadz = item.u || item.ustadz || item.author || 'Asatidzah';
-  const link = item.l || item.telegram_link || item.link || (item.m ? `https://t.me/daftarkajiansalafy/${item.m}` : window.location.href);
+  const link = item.l || item.telegram_link || item.link || item.volumes?.[0]?.link || item.episodes?.[0]?.link || (item.m ? `https://t.me/daftarkajiansalafy/${item.m}` : (item.episodes?.[0]?.msg_id ? `https://t.me/daftarkajiansalafy/${item.episodes[0].msg_id}` : window.location.href));
 
-  const shareText = `🎙️ *${title}*\n👤 Pemateri: ${ustadz}\n\n🔗 Dengarkan / Buka di Telegram:\n${link}\n\n_Disalin dari Portal Daftar Kajian Salafy_`;
+  const shareText = `*${title}*\nPemateri / Penulis: ${ustadz}\n\nDengarkan / Buka di Telegram:\n${link}\n\n_Disalin dari Portal Daftar Kajian Salafy (daftarkajian.web.id)_`;
 
   const handleCopyText = () => {
     navigator.clipboard.writeText(shareText);
@@ -31,7 +32,7 @@ export default function ShareModal({ item, onClose }) {
   };
 
   const handleShareTelegram = () => {
-    const url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(`🎙️ ${title}\n👤 ${ustadz}`)}`;
+    const url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(`${title}\nPemateri / Penulis: ${ustadz}`)}`;
     window.open(url, '_blank');
   };
 
@@ -63,7 +64,8 @@ export default function ShareModal({ item, onClose }) {
             onClick={handleShareWhatsApp}
             className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center space-x-2 shadow-sm btn-press"
           >
-            <span>💬 WhatsApp</span>
+            <MessageCircle className="w-3.5 h-3.5" />
+            <span>WhatsApp</span>
           </button>
           <button
             onClick={handleShareTelegram}

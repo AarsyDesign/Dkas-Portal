@@ -14,7 +14,9 @@ import {
   X,
   Layers,
   ArrowUpDown,
-  ArrowDownUp
+  ArrowDownUp,
+  Mic,
+  BookOpen
 } from 'lucide-react';
 import HighlightText from '../components/HighlightText';
 import CategoryScrollRow from '../components/CategoryScrollRow';
@@ -35,12 +37,12 @@ const CATEGORIES = [
 ];
 
 const SORT_OPTIONS = [
-  { id: 'msg_desc', label: '🔥 Kajian Terbaru (Default)' },
-  { id: 'msg_asc', label: '🔢 Nomor Kajian 1 ➔ Seterusnya (Awal / Terlama)' },
-  { id: 'title_asc', label: '🔤 Judul A ➔ Z' },
-  { id: 'title_desc', label: '🔤 Judul Z ➔ A' },
-  { id: 'duration_desc', label: '⏱️ Durasi Terpanjang' },
-  { id: 'duration_asc', label: '⏱️ Durasi Terpendek' }
+  { id: 'msg_desc', label: 'Kajian Terbaru (Default)' },
+  { id: 'msg_asc', label: 'Nomor Kajian 1 - Seterusnya (Awal / Terlama)' },
+  { id: 'title_asc', label: 'Judul A - Z' },
+  { id: 'title_desc', label: 'Judul Z - A' },
+  { id: 'duration_desc', label: 'Durasi Terpanjang' },
+  { id: 'duration_asc', label: 'Durasi Terpendek' }
 ];
 
 import { getAudioCatalog } from '../services/apiClient';
@@ -110,6 +112,11 @@ export default function CatalogView({
     navigator.clipboard.writeText(link);
     setCopiedId(item.i);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const formatDuration = (secs) => {
@@ -274,13 +281,14 @@ export default function CatalogView({
 
                   {/* Ustadz & Kitab */}
                   <div className="space-y-0.5 text-[11px]">
-                    <p className="font-semibold text-emerald-700 dark:text-emerald-400 truncate flex items-center space-x-1">
-                      <span>🎙️</span>
+                    <p className="font-semibold text-emerald-700 dark:text-emerald-400 truncate flex items-center space-x-1.5">
+                      <Mic className="w-3.5 h-3.5 shrink-0" />
                       <span className="truncate"><HighlightText text={item.u} highlight={searchQuery} /></span>
                     </p>
                     {item.k && (
-                      <p className="text-slate-500 dark:text-slate-400 truncate text-[10px]">
-                        📖 Kitab: {item.k}
+                      <p className="text-slate-500 dark:text-slate-400 truncate text-[10px] flex items-center space-x-1.5">
+                        <BookOpen className="w-3 h-3 text-slate-400 shrink-0" />
+                        <span className="truncate">Kitab: {item.k}</span>
                       </p>
                     )}
                   </div>
@@ -338,7 +346,7 @@ export default function CatalogView({
       {totalPages > 1 && (
         <div className="pt-4 flex items-center justify-center space-x-2">
           <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
+            onClick={() => handlePageChange(Math.max(1, page - 1))}
             disabled={page === 1}
             className="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 disabled:opacity-40 btn-press"
           >
@@ -350,7 +358,7 @@ export default function CatalogView({
           </span>
 
           <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
             disabled={page === totalPages}
             className="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-300 disabled:opacity-40 btn-press"
           >

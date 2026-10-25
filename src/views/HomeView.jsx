@@ -16,19 +16,21 @@ import {
   Scroll, 
   ShieldCheck, 
   Compass, 
-  Send 
+  Send,
+  PenTool,
+  X
 } from 'lucide-react';
 import { getLibraryBooks, getSeriesCatalog } from '../services/apiClient';
 
 const POPULAR_PILLS = [
-  { label: '🎓 Dauroh Ilmiah', category: 'Dauroh' },
-  { label: '🎙️ Khutbah Jum\'at', category: 'Khutbah Jum\'at' },
-  { label: '❓ Tanya Jawab', category: 'Tanya Jawab' },
-  { label: '🛡️ Akidah Salaf', category: 'Akidah' },
-  { label: '⚖️ Fiqh Ibadah', category: 'Fiqh' },
-  { label: '📜 Hadits & Sunnah', category: 'Hadits' },
-  { label: '📖 Tafsir Al-Qur\'an', category: 'Tafsir' },
-  { label: '📚 Kitab Ulama (PDF)', isLibrary: true },
+  { label: 'Dauroh Ilmiah', category: 'Dauroh', icon: GraduationCap },
+  { label: 'Khutbah Jum\'at', category: 'Khutbah Jum\'at', icon: Mic },
+  { label: 'Tanya Jawab', category: 'Tanya Jawab', icon: HelpCircle },
+  { label: 'Akidah Salaf', category: 'Akidah', icon: ShieldCheck },
+  { label: 'Fiqh Ibadah', category: 'Fiqh', icon: Scale },
+  { label: 'Hadits & Sunnah', category: 'Hadits', icon: Scroll },
+  { label: 'Tafsir Al-Qur\'an', category: 'Tafsir', icon: BookOpen },
+  { label: 'Kitab Ulama (PDF)', isLibrary: true, icon: Library },
 ];
 
 const SEARCH_SUGGESTIONS = [
@@ -140,7 +142,7 @@ export default function HomeView({
               Daftar Kajian Asatidzah Salafiyah & Perpustakaan Kitab
             </h1>
             <p className="text-xs sm:text-base text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed">
-              Akses cepat ke <strong>{stats?.total_audio ? stats.total_audio.toLocaleString('id-ID') : '32.000+'} rekaman audio</strong>, <strong>{stats?.total_series || '400+'} seri kajian rutin</strong>, dan <strong>{stats?.total_books ? stats.total_books.toLocaleString('id-ID') : '2.300+'} judul kitab PDF</strong> para ulama Ahlussunnah.
+              Akses cepat ke <strong>{stats?.total_audio ? stats.total_audio.toLocaleString('id-ID') : '32.380'} rekaman audio</strong>, <strong>{stats?.total_series || '451'} seri kajian rutin</strong>, dan <strong>{stats?.total_books ? stats.total_books.toLocaleString('id-ID') : '1.628'} judul kitab PDF</strong> para ulama Ahlussunnah.
             </p>
           </div>
 
@@ -161,7 +163,7 @@ export default function HomeView({
                 className="absolute right-20 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
                 title="Hapus pencarian"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             )}
             <button
@@ -174,22 +176,26 @@ export default function HomeView({
 
           {/* Quick Filter Chips */}
           <div className="flex items-center justify-center flex-wrap gap-2 pt-2">
-            {POPULAR_PILLS.map((pill, idx) => (
-              <button
-                key={idx}
-                onClick={() => {
-                  if (pill.isLibrary) {
-                    onNavigateTab('library');
-                  } else {
-                    onSelectCategory(pill.category);
-                    onNavigateTab('catalog');
-                  }
-                }}
-                className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 text-xs font-semibold backdrop-blur-md btn-press transition-colors"
-              >
-                {pill.label}
-              </button>
-            ))}
+            {POPULAR_PILLS.map((pill, idx) => {
+              const PillIcon = pill.icon;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    if (pill.isLibrary) {
+                      onNavigateTab('library');
+                    } else {
+                      onSelectCategory(pill.category);
+                      onNavigateTab('catalog');
+                    }
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 text-xs font-semibold backdrop-blur-md btn-press transition-colors inline-flex items-center space-x-1.5"
+                >
+                  <PillIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>{pill.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -291,16 +297,18 @@ export default function HomeView({
                     <span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold">
                       {book.category}
                     </span>
-                    <span className="text-slate-400 font-mono">
-                      📖 {book.total_pages} Hlm
+                    <span className="text-slate-400 font-mono flex items-center space-x-1">
+                      <BookOpen className="w-3 h-3 text-slate-400 shrink-0" />
+                      <span>{book.total_pages} Hlm</span>
                     </span>
                   </div>
                   <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 line-clamp-2 leading-snug font-serif" dir="auto">
                     {book.title}
                   </h4>
                 </div>
-                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 truncate">
-                  ✍️ {book.author}
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 truncate flex items-center space-x-1.5">
+                  <PenTool className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span className="truncate">{book.author}</span>
                 </div>
               </div>
             ))}
@@ -345,8 +353,9 @@ export default function HomeView({
                     {s.name}
                   </h4>
                 </div>
-                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold truncate">
-                  🎙️ {s.ustadz}
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold truncate flex items-center space-x-1.5">
+                  <Mic className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">{s.ustadz}</span>
                 </div>
               </div>
             ))}
